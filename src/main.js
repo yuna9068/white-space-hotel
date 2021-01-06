@@ -1,5 +1,8 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
+import axios from './plugins/axios';
 
-createApp(App).use(router).mount('#app');
+import '@/assets/style/common.sass';
+
+createApp(App).use(router).use(axios).mount('#app');

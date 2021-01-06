@@ -9,4 +9,13 @@
   display: flex
   justify-content: $jc
   align-items: $ai
-  
+
+// 斑馬紋圖樣
+// 從位置 0 開始到位置 5px 是 $bg，從位置 5px 開始到位置 7px 是 white，從位置 7px 開始到位置 8px 是 $bg，然後再重複這個圖樣
+@mixin zebra-pattern($bg)
+  background-image: repeating-linear-gradient(45deg, $bg, $bg 5px, white 5px, $bg 7px, $bg 8px)
+
+// 斑馬紋 - 白色
+@mixin zebra-white
+  $zebra-white-bg: rgba(255, 255, 255, 0.3)
+  @include zebra-pattern($zebra-white-bg)

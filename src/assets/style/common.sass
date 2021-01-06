@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap')
+
+*, *:before, *:after
+  margin: 0
+  padding: 0
+  outline: none
+  border: none
+  box-sizing: border-box
+  -webkit-overflow-scrolling: touch // 控制元素在行動裝置上是否使用滾動回彈效果
+  -webkit-font-smoothing: antialiased // 僅在 Mac OS X / macOS 有效，避免文字鋸齒化
+  -moz-osx-font-smoothing: grayscale // 僅在 Mac OS X / macOS 有效，避免文字鋸齒化
+  font-family: 'Noto Sans TC', sans-serif
+  font-weight: $font-weight-default
+  font-size: $font-size-default
+  line-height: $line-height-default
+  color: $secondary-color
+
+a
+  text-decoration: none
+  cursor: pointer
+
+ul
+  list-style: none
+
+// 圖片自適應
+img
+  max-width: 100%
+  height: auto
+
+button
+  appearance: none
+
+.logo
+  @include hide-text

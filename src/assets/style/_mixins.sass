@@ -1,0 +1,12 @@
+// 隱藏文字
+@mixin hide-text
+  text-indent: 100%
+  white-space: nowrap
+  overflow: hidden
+
+// flexbox
+@mixin flex($jc: flex-start, $ai: flex-start)
+  display: flex
+  justify-content: $jc
+  align-items: $ai
+  

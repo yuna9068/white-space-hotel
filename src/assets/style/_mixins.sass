@@ -31,3 +31,9 @@
 @mixin zebra-black($bg-width: 1, $line-width: 1.5)
   $line-color: #575757
   @include zebra-pattern($line-color, $bg-width, $line-width)
+
+// 斑馬紋 - 黑色_三條斜線
+@mixin zebra-three-slashes
+  width: 45px
+  height: 9px
+  @include zebra-black(8, 1.5)

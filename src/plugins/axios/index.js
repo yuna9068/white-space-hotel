@@ -1,8 +1,10 @@
 import axios from 'axios';
 
-const plugin = {
-  install(Vue) {
-    Vue.config.globalProperties.$axios = axios;
+const pluginAxios = {
+  install(app) {
+    /* eslint-disable no-param-reassign */
+    app.config.globalProperties.$axios = axios;
+    /* eslint-disable no-param-reassign */
 
     axios.defaults.baseURL = 'https://challenge.thef2e.com/api/thef2e2019/stage6/';
     axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -28,7 +30,7 @@ const plugin = {
       console.log('response error: ', error);
       return Promise.reject(error);
     });
-  }
-}
+  },
+};
 
-export default plugin;
+export default pluginAxios;

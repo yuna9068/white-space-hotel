@@ -1,8 +1,13 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
-import axios from './plugins/axios';
+import pluginAxios from './plugins/axios';
+import pluginModal from './plugins/modal';
 
 import '@/assets/style/common.sass';
 
-createApp(App).use(router).use(axios).mount('#app');
+createApp(App)
+  .use(router)
+  .use(pluginAxios)
+  .use(pluginModal)
+  .mount('#app');

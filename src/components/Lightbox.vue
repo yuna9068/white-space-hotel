@@ -1,5 +1,5 @@
 <template lang="pug">
-.lightbox.semi-transparent(:class="{'hide': !info.lightboxDisplay}" @click.self="$emit('close')")
+.lightbox.semi-transparent(:class="{'hide': !info.display}" @click.self="$emit('close')")
   .lightbox__arrow-left(
     :class="{'lightbox__arrow--disabled': nowIndex === 0}"
     @click.stop="changePhoto(nowIndex - 1)"
@@ -52,7 +52,6 @@ export default {
 <style lang="sass" scoped>
 .lightbox
   padding: 8% 10%
-  @include flex(center, center)
   &__arrow-left, &__arrow-right
     color: $primary-color
     font-size: 38px
@@ -67,7 +66,7 @@ export default {
 
 .photo
   &__display
-    box-shadow: 0 2px 9px 0 rgba(0,0,0,0.50)
+    box-shadow: 0 2px 9px 0 rgba(0, 0, 0, 0.5)
     margin-bottom: 19px
     @include flex(center, center)
     img

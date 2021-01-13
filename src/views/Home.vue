@@ -1,7 +1,7 @@
 <template lang="pug">
 .Home(:style="bgImage")
   h1.logo White Space Hotel
-  Menu.menu(:menuList="menuList" @change-room="changeRoom" @room-detail="getRoomDetail")
+  Menu.menu(:menuList="menuList" @change-room="changeRoom" @room-detail="goRoomDetail")
   .type
     .type__index {{ selectedRoomIndex }}
     .type__name {{ selectedRoom.name }}
@@ -52,19 +52,8 @@ export default {
         }
       });
     },
-    getRoomDetail(id) {
-      this.$axios({
-        method: 'get',
-        url: `room/${id}`,
-      }).then((response) => {
-        if (response.data.success) {
-          const room = JSON.stringify(response.data.room);
-          const booking = JSON.stringify(response.data.booking);
-          this.$router.push({ name: 'RoomDetail', params: { room, booking } });
-        } else {
-          console.log(response.data);
-        }
-      });
+    goRoomDetail(id) {
+      this.$router.push({ name: 'RoomDetail', params: { roomId: id } });
     },
     changeRoom(id) {
       const index = this.rooms.findIndex((item) => item.id === id);

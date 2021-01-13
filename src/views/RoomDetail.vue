@@ -1,6 +1,7 @@
 <template lang="pug">
-h1.logo White Space Hotel
-.photo
+router-link(to="/")
+  h1.logo White Space Hotel
+.photo(v-if="room.imageUrl")
   img.photo__primary(
     :src="room.imageUrl[0]"
     :alt="`${room.name} Photo`"
@@ -17,13 +18,13 @@ h1.logo White Space Hotel
       :alt="`${room.name} Photo`"
       @click="showLightbox(true, 2)"
     )
-.detail
+.detail(v-if="room.name")
   .room
     .room-info
       .room-info__title {{ room.name }}
       ul.room-info__list
         li 房客人數限制： {{ room.descriptionShort.GuestMin }}~{{ room.descriptionShort.GuestMax }} 人
-        li 床型：{{ bedType(room.descriptionShort.Bed) }}
+        li 床型：{{ bedType }}
         li 衛浴數量： {{ room.descriptionShort['Private-Bath'] }} 間
         li 房間大小： {{ room.descriptionShort.Footage }} 平方公尺
       .room-info__desc {{ room.description }}
@@ -53,37 +54,152 @@ h1.logo White Space Hotel
       li.sofa(:class="{'not-provide': !room.amenities.Sofa}") 沙發
       li.dog(:class="{'not-provide': !room.amenities['Pet-Friendly']}") 寵物攜帶
   .reservation
-    .reservation__date-picker datepicker
-    .reservation__button 預約時段
-Lightbox(:info="lightboxInfo" @close="showLightbox(false)")
+    .reservation__date-picker
+      DatePicker(
+        :markDates="bookedDates"
+        @get-selected-date="getSelectedDate"
+        ref="DatePicker"
+      )
+    button.reservation__button(@click="checkSelectedDate()") 預約時段
+
+Lightbox(
+  :info="lightboxInfo"
+  @close="showLightbox(false)"
+)
+
+Booking(
+  :info="bookingInfo"
+  @close="showBooking(false)"
+  @reservation-room="reservationRoom"
+)
 </template>
 
 <script>
+import DatePicker from '@/components/DatePicker.vue';
 import Lightbox from '@/components/Lightbox.vue';
+import Booking from '@/components/Booking.vue';
 
 export default {
   name: 'RoomDetail',
   components: {
+    DatePicker,
     Lightbox,
+    Booking,
   },
   data() {
     return {
-      room: {},
-      booking: [],
-      lightboxInfo: {
+      roomId: '', // 房型編號
+      room: {}, // 房型資訊
+      bookedInfo: [], // 已預訂資料
+      bookedDates: [], // 已預訂日期
+      totalDates: [], // 使用者選擇的所有日期
+      lightboxInfo: { // 照片大圖顯示資訊
         name: '',
         photo: [],
         photoIndex: 0,
-        lightboxDisplay: false,
+        display: false,
+      },
+      bookingInfo: { // 預定時段彈窗顯示資訊
+        display: false,
+        weekday: 0,
+        holiday: 0,
+        weekdayPrice: 0,
+        holidayPrice: 0,
+        startDate: '',
+        endDate: '',
       },
     };
   },
   created() {
-    [this.room] = JSON.parse(this.$route.params.room);
-    this.booking = JSON.parse(this.$route.params.booking);
+    this.roomId = this.$route.params.roomId;
+    this.getRoomDetail();
   },
   methods: {
-    bedType(bed) {
+    // 取得房型詳細資訊
+    getRoomDetail() {
+      this.$axios({
+        method: 'get',
+        url: `room/${this.roomId}`,
+      }).then((response) => {
+        if (response.data.success) {
+          [this.room] = response.data.room;
+          this.bookedInfo = response.data.booking;
+          this.bookedInfo.forEach((booking) => {
+            this.bookedDates[booking.date] = '';
+          });
+        } else {
+          console.log(response.data);
+        }
+      });
+    },
+    // 取得使用者選擇的預約日期
+    getSelectedDate({ weekday, holiday, totalDates }) {
+      this.bookingInfo.weekday = weekday;
+      this.bookingInfo.holiday = holiday;
+      this.bookingInfo.weekdayPrice = this.room.normalDayPrice;
+      this.bookingInfo.holidayPrice = this.room.holidayPrice;
+      [this.bookingInfo.startDate] = totalDates;
+      this.bookingInfo.endDate = totalDates[totalDates.length - 1];
+      this.totalDates = totalDates;
+    },
+    // 確認使用者已選擇預約日期
+    checkSelectedDate() {
+      this.$refs.DatePicker.getSelectedDate();
+      if (this.totalDates.length > 0) {
+        this.showBooking(true);
+      } else {
+        this.$modal.open({
+          title: '提示訊息',
+          msg: '請選擇預約起迄日期',
+          btnText: '關閉',
+        });
+      }
+    },
+    reservationRoom({ name, tel }) {
+      console.log('name', name);
+      console.log('tel', tel);
+      this.showBooking(false);
+
+      // this.$axios({
+      //   method: 'post',
+      //   url: `room/${this.roomId}`,
+      //   params: {
+      //     name,
+      //     tel,
+      //     totalDates,
+      //   },
+      // }).then((response) => {
+      //   if (response.data.success) {
+      //     this.$modal.open({
+      //       title: '預約成功',
+      //       msg: '',
+      //       btnText: '回頁面',
+      //     });
+      //   } else {
+      //     this.$modal.open({
+      //       title: '預約失敗',
+      //       msg: response.data,
+      //       btnText: '返回',
+      //     });
+      //   }
+      // });
+    },
+    // 顯示/隱藏 Lightbox
+    showLightbox(show, i = 0) {
+      this.lightboxInfo.name = this.room.name;
+      this.lightboxInfo.photo = this.room.imageUrl;
+      this.lightboxInfo.photoIndex = i;
+      this.lightboxInfo.display = show;
+    },
+    // 顯示/隱藏 Booking
+    showBooking(show) {
+      this.bookingInfo.display = show;
+    },
+  },
+  computed: {
+    // 床型文字轉換
+    bedType() {
+      const bed = this.room.descriptionShort.Bed || [];
       let bedQty = '1 張';
       if (bed.length > 1) {
         bedQty = `${bed.length} 張`;
@@ -104,13 +220,6 @@ export default {
         default:
           return `${bedQty}床`;
       }
-    },
-    // 顯示L Lightbox
-    showLightbox(show, i = 0) {
-      this.lightboxInfo.name = this.room.name;
-      this.lightboxInfo.photo = this.room.imageUrl;
-      this.lightboxInfo.photoIndex = i;
-      this.lightboxInfo.lightboxDisplay = show;
     },
   },
 };
@@ -212,9 +321,7 @@ export default {
     position: absolute
     top: -37px
     left: 0
-    width: 45px
-    height: 9px
-    @include zebra-black(8, 1.5)
+    @include zebra-three-slashes
   div:first-child
     margin-right: 20%
   p
@@ -265,7 +372,7 @@ export default {
 .reservation
   &__date-picker
     margin-bottom: 26px
-    box-shadow: 0 2px 10px 0 rgba(0,0,0,0.15)
+    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.15)
   &__button
     width: 118px
     height: 53px

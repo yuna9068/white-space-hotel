@@ -47,13 +47,22 @@ export default {
           this.menuList = this.rooms.map((room) => ({ id: room.id, name: room.name }));
           this.selectedRoomIndex = '01';
           [this.selectedRoom] = [...this.rooms];
-        } else {
-          console.log(response.data);
         }
+      }).catch((error) => {
+        let errorMsg = '系統異常，請重新整理頁面後再試';
+        if (error.response.data.message) {
+          errorMsg = error.response.data.message;
+        }
+        this.$modal.open({
+          title: '系統異常',
+          msg: errorMsg,
+          btnText: '關閉',
+        });
       });
     },
     goRoomDetail(id) {
-      this.$router.push({ name: 'RoomDetail', params: { roomId: id } });
+      sessionStorage.setItem('roomId', id);
+      this.$router.push({ name: 'RoomDetail' });
     },
     changeRoom(id) {
       const index = this.rooms.findIndex((item) => item.id === id);

@@ -61,6 +61,7 @@ router-link(to="/")
         ref="DatePicker"
       )
     button.reservation__button(@click="checkSelectedDate()") 預約時段
+    button.reservation__delete(@click="deleteAllReservation()") 取消所有預約
 
 Lightbox(
   :info="lightboxInfo"
@@ -72,12 +73,15 @@ Booking(
   @close="showBooking(false)"
   @reservation-room="reservationRoom"
 )
+
+Loading(:display="loadingDisplay")
 </template>
 
 <script>
 import DatePicker from '@/components/DatePicker.vue';
 import Lightbox from '@/components/Lightbox.vue';
 import Booking from '@/components/Booking.vue';
+import Loading from '@/components/Loading.vue';
 
 export default {
   name: 'RoomDetail',
@@ -85,6 +89,7 @@ export default {
     DatePicker,
     Lightbox,
     Booking,
+    Loading,
   },
   data() {
     return {
@@ -108,10 +113,12 @@ export default {
         startDate: '',
         endDate: '',
       },
+      loadingDisplay: false,
     };
   },
   created() {
-    this.roomId = this.$route.params.roomId;
+    this.showLoading(true);
+    this.roomId = sessionStorage.getItem('roomId');
     this.getRoomDetail();
   },
   methods: {
@@ -121,15 +128,29 @@ export default {
         method: 'get',
         url: `room/${this.roomId}`,
       }).then((response) => {
+        this.showLoading(false);
         if (response.data.success) {
           [this.room] = response.data.room;
           this.bookedInfo = response.data.booking;
+          this.bookedDates = {};
           this.bookedInfo.forEach((booking) => {
             this.bookedDates[booking.date] = '';
           });
-        } else {
-          console.log(response.data);
         }
+
+        this.$nextTick(() => {
+          this.$refs.DatePicker.initDatePicker();
+        });
+      }).catch((error) => {
+        let errorMsg = '系統異常，請重新整理頁面後再試';
+        if (error.response.data.message) {
+          errorMsg = error.response.data.message;
+        }
+        this.$modal.open({
+          title: '系統異常',
+          msg: errorMsg,
+          btnText: '關閉',
+        });
       });
     },
     // 取得使用者選擇的預約日期
@@ -155,34 +176,53 @@ export default {
         });
       }
     },
+    // 預約房間
     reservationRoom({ name, tel }) {
-      console.log('name', name);
-      console.log('tel', tel);
       this.showBooking(false);
+      this.showLoading(true);
 
-      // this.$axios({
-      //   method: 'post',
-      //   url: `room/${this.roomId}`,
-      //   params: {
-      //     name,
-      //     tel,
-      //     totalDates,
-      //   },
-      // }).then((response) => {
-      //   if (response.data.success) {
-      //     this.$modal.open({
-      //       title: '預約成功',
-      //       msg: '',
-      //       btnText: '回頁面',
-      //     });
-      //   } else {
-      //     this.$modal.open({
-      //       title: '預約失敗',
-      //       msg: response.data,
-      //       btnText: '返回',
-      //     });
-      //   }
-      // });
+      this.$axios({
+        method: 'post',
+        url: `room/${this.roomId}`,
+        params: {
+          name,
+          tel,
+          date: this.totalDates,
+        },
+      }).then((response) => {
+        if (response.data.success) {
+          this.getRoomDetail();
+          this.$modal.open({
+            title: '預約成功',
+            msg: '',
+            btnText: '回頁面',
+          });
+        }
+      }).catch((error) => {
+        this.getRoomDetail();
+        let errorMsg = '系統異常，請稍後再試';
+        if (error.response.data.message) {
+          errorMsg = error.response.data.message;
+        }
+        this.$modal.open({
+          title: '預約失敗',
+          msg: errorMsg,
+          btnText: '返回',
+        });
+      });
+    },
+    // 取消所有預約
+    deleteAllReservation() {
+      this.$axios({
+        method: 'delete',
+        url: 'rooms',
+      }).then((response) => {
+        if (response.data.success) {
+          this.getRoomDetail();
+        }
+      }).catch(() => {
+        this.getRoomDetail();
+      });
     },
     // 顯示/隱藏 Lightbox
     showLightbox(show, i = 0) {
@@ -194,6 +234,10 @@ export default {
     // 顯示/隱藏 Booking
     showBooking(show) {
       this.bookingInfo.display = show;
+    },
+    // 顯示/隱藏 Loading
+    showLoading(show) {
+      this.loadingDisplay = show;
     },
   },
   computed: {
@@ -393,4 +437,13 @@ export default {
       left: 6px
       z-index: -1
       @include zebra-black
+  &__delete
+    position: fixed
+    right: 10px
+    bottom: 20px
+    padding: 10px
+    border-radius: 5px
+    background: #F0F0F0
+    color: #ffffff
+    font-weight: 500
 </style>

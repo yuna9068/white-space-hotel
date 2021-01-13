@@ -13,23 +13,25 @@ const pluginAxios = {
     const token = 'V8AmnnzkrsFuXarQiVFv8ZAr5RXl6JgBnjn1GweP9wb7vbyxiRkWJGjPq4ut';
     axios.defaults.headers.Authorization = `Bearer ${token}`;
 
-    axios.interceptors.request.use((config) => {
-      console.log('=== axios/index.js request ===');
-      console.log(config);
-      return config;
-    }, (error) => {
-      console.log('request error: ', error);
-      return Promise.reject(error);
-    });
+    axios.interceptors.request.use((config) => config, (error) => Promise.reject(error));
+    // axios.interceptors.request.use((config) => {
+    //   console.log('=== axios/index.js request ===');
+    //   console.log(config);
+    //   return config;
+    // }, (error) => {
+    //   console.log('request error: ', error);
+    //   return Promise.reject(error);
+    // });
 
-    axios.interceptors.response.use((response) => {
-      console.log('=== axios.interceptors.response ===');
-      console.log(response);
-      return response;
-    }, (error) => {
-      console.log('response error: ', error);
-      return Promise.reject(error);
-    });
+    axios.interceptors.response.use((response) => response, (error) => Promise.reject(error));
+    // axios.interceptors.response.use((response) => {
+    //   console.log('=== axios.interceptors.response ===');
+    //   console.log(response);
+    //   return response;
+    // }, (error) => {
+    //   console.log('response error: ', error);
+    //   return Promise.reject(error);
+    // });
   },
 };
 

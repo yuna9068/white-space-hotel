@@ -1,5 +1,6 @@
 <template lang="pug">
-.datepicker
+#datepicker__block
+  #datepicker
 </template>
 
 <script>
@@ -19,15 +20,18 @@ export default {
       nowSelected: '',
     };
   },
-  mounted() {
-    this.initDatePicker();
-  },
   methods: {
     // 初始化日曆
     initDatePicker() {
+      // 因只能渲染一次，故先移除元素，再新增回去，然後重新渲染
+      document.querySelector('#datepicker').remove();
+      const child = document.createElement('div');
+      child.id = 'datepicker';
+      document.querySelector('#datepicker__block').appendChild(child);
+
       const vueThis = this;
       this.laydate.render({
-        elem: '.datepicker',
+        elem: '#datepicker',
         isInitValue: false,
         min: new Date().toISOString().substr(0, 10),
         max: this.maxDate(),
@@ -59,7 +63,7 @@ export default {
     },
     // 日曆標題顯示格式，由"yyyy年 m月"改成"yyyy / m"
     changeTitle(year, month) {
-      const title = document.querySelector('.datepicker .laydate-set-ym');
+      const title = document.querySelector('#datepicker .laydate-set-ym');
       title.children[0].textContent = `${year} / `;
       title.children[1].textContent = month;
     },
@@ -67,7 +71,7 @@ export default {
     changeMonth() {
       document.querySelectorAll('.laydate-prev-m').forEach((item) => {
         item.addEventListener('click', () => {
-          const titleChild = document.querySelector('.datepicker .laydate-set-ym').children;
+          const titleChild = document.querySelector('#datepicker .laydate-set-ym').children;
           const year = titleChild[0].textContent.substr(0, 4);
           const month = titleChild[1].textContent.substr(0, titleChild[1].textContent.length - 1);
           this.changeTitle(year, month);
@@ -76,7 +80,7 @@ export default {
 
       document.querySelectorAll('.laydate-next-m').forEach((item) => {
         item.addEventListener('click', () => {
-          const titleChild = document.querySelector('.datepicker .laydate-set-ym').children;
+          const titleChild = document.querySelector('#datepicker .laydate-set-ym').children;
           const year = titleChild[0].textContent.substr(0, 4);
           const month = titleChild[1].textContent.substr(0, titleChild[1].textContent.length - 1);
           this.changeTitle(year, month);
@@ -98,10 +102,6 @@ export default {
       }
 
       const datePickerResult = this.computerDays(this.laydateStart, this.laydateEnd);
-
-      console.log('this.laydateStart: ', this.laydateStart);
-      console.log('this.laydateEnd: ', this.laydateEnd);
-      console.log('datePickerResult: ', datePickerResult);
 
       this.$emit('get-selected-date', datePickerResult);
     },

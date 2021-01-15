@@ -89,8 +89,12 @@ export default {
   margin: auto
   padding: 27px 43px 34px 42px
   width: 423px
+  max-width: 90vw
   background: $primary-color
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5)
+  overflow: hidden
+  @include tablet()
+    padding: 5%
   *
     font-weight: 500
   &__title
@@ -115,6 +119,8 @@ export default {
     label
       width: 62px
       margin-right: 32px
+      @media (max-width: 340px)
+        margin-right: 17px
     input
       flex: auto
       padding: 7px 11px
@@ -126,20 +132,32 @@ export default {
     input
       width: 100px
       flex-grow: 0
-      font-size: 12px
+      font-size: $font-size-small
       letter-spacing: 1.3px
   &__nights
     background: #EDEDED
-    width: 423px
-    margin-left: -42px
-    padding: 15px 43px 18px 42px
+    padding: 15px 0
+    position: relative
+    &::before, &::after
+      content: ''
+      position: absolute
+      width: 100px
+      height: 100%
+      background: inherit
+      top: 0
+    &::before
+      left: 0
+      transform: translateX(-100%)
+    &::after
+      right: 0
+      transform: translateX(100%)
     .booking-form__row
       margin-bottom: 0
       span
-        font-size: 12px
+        font-size: $font-size-small
         line-height: 18px
         letter-spacing: 1.3px
-        color: #6D7278
+        color: $dark-grey
   &__price
     font-size: 26px
     color: #FF5C5C
@@ -155,7 +173,7 @@ export default {
       cursor: pointer
       &[type="button"]
         background: #D8D8D8
-        color: #6D7278
+        color: $dark-grey
       &[type="submit"]
         background: #484848
         color: $primary-color

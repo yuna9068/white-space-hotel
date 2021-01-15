@@ -39,6 +39,7 @@ export default {
 <style lang="sass" scoped>
 .modal
   width: 423px
+  max-width: 90vw
   padding: 32px 42px
   background: $primary-color
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5)

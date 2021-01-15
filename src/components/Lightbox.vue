@@ -1,19 +1,21 @@
 <template lang="pug">
-.lightbox.semi-transparent(:class="{'hide': !info.display}" @click.self="$emit('close')")
-  .lightbox__arrow-left(
-    :class="{'lightbox__arrow--disabled': nowIndex === 0}"
-    @click.stop="changePhoto(nowIndex - 1)"
-  ) &lt;
-  .lightbox__photo
-    .photo__display
-     img(:src="info.photo[nowIndex]" :alt="`${info.name} Photo`")
-    .photo__desc
-      .photo__desc-name {{ info.name }}
-      .photo__desc-qty {{ nowIndex + 1 }}/{{ info.photo.length }}
-  .lightbox__arrow-right(
-    :class="{'lightbox__arrow--disabled': nowIndex === info.photo.length - 1}"
-    @click.stop="changePhoto(nowIndex + 1)"
-  ) &gt;
+.semi-transparent(:class="{'hide': !info.display}")
+  .lightbox
+    .lightbox__arrow-left(
+      :class="{'lightbox__arrow--disabled': nowIndex === 0}"
+      @click.stop="changePhoto(nowIndex - 1)"
+    ) &lt;
+    .lightbox__photo
+      .photo__display
+        img(:src="info.photo[nowIndex]" :alt="`${info.name} Photo`")
+      .photo__desc
+        .photo__desc-name {{ info.name }}
+        .photo__desc-qty {{ nowIndex + 1 }}/{{ info.photo.length }}
+      .photo__close(@click.self="$emit('close')") x
+    .lightbox__arrow-right(
+      :class="{'lightbox__arrow--disabled': nowIndex === info.photo.length - 1}"
+      @click.stop="changePhoto(nowIndex + 1)"
+    ) &gt;
 </template>
 
 <script>
@@ -50,19 +52,40 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+$text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5)
+
 .lightbox
   padding: 8% 10%
+  position: relative
+  @include flex(center, center)
+  @include tablet()
+    padding: 5%
   &__arrow-left, &__arrow-right
     color: $primary-color
     font-size: 38px
     transform: scaleY(3)
     cursor: pointer
     user-select: none
+    text-shadow: $text-shadow
+    @include tablet()
+      position: absolute
+      top: calc(50% - 20px)
+      transform: translateY(-5px) scaleY(3)
+  &__arrow-left
+    @include tablet()
+      left: 7%
+      z-index: 1
+  &__arrow-right
+    @include tablet()
+      right: 7%
   &__arrow--disabled
     opacity: 0.5
     cursor: not-allowed
   &__photo
     margin: 0 80px
+    position: relative
+    @include tablet()
+      margin: 0
 
 .photo
   &__display
@@ -77,4 +100,15 @@ export default {
       font-weight: 500
       color: $primary-color
       letter-spacing: 1.7px
+      text-shadow: $text-shadow
+  &__close
+    position: absolute
+    top: 20px
+    right: 30px
+    font-weight: 500
+    color: $primary-color
+    user-select: none
+    cursor: pointer
+    transform: scale(3, 2)
+    text-shadow: $text-shadow
 </style>

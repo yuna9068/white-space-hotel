@@ -33,7 +33,7 @@ export default {
       this.laydate.render({
         elem: '#datepicker',
         isInitValue: false,
-        min: new Date().toISOString().substr(0, 10),
+        min: this.minDate(),
         max: this.maxDate(),
         showBottom: false,
         theme: 'datepicker-default',
@@ -52,9 +52,15 @@ export default {
         },
       });
     },
-    // 只能預約 90 天內的時段
+    // 最小可預約日期，不包含今天
+    minDate() {
+      const minDate = new Date().setDate(new Date().getDate() + 1);
+      const minDateString = new Date(minDate).toISOString().substr(0, 10);
+      return minDateString;
+    },
+    // 只能預約 90 天內的時段，不包含今天
     maxDate() {
-      const maxDate = new Date().setDate(new Date().getDate() + 89);
+      const maxDate = new Date().setDate(new Date().getDate() + 90);
       const maxDateString = new Date(maxDate).toISOString().substr(0, 10);
       return maxDateString;
     },
@@ -149,7 +155,7 @@ export default {
 </script>
 
 <style lang="sass">
-$datepicker-font-color: #6D7278 !important
+$datepicker-font-color: $dark-grey !important
 $datepicker-disabled-font-color: #C9CCD0 !important
 
 .laydate-theme-datepicker-default
@@ -167,6 +173,8 @@ $datepicker-disabled-font-color: #C9CCD0 !important
     // 年月及 < > 按鈕
   .layui-laydate-header
     border-bottom: none
+    padding-left: 60px
+    padding-right: 60px
     @include flex(space-between, center)
     .laydate-set-ym span
       font-size: 18px

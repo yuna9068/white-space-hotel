@@ -2,20 +2,24 @@
 router-link(to="/")
   h1.logo White Space Hotel
 .photo(v-if="room.imageUrl")
-  img.photo__primary(
-    :src="room.imageUrl[0]"
-    :alt="`${room.name} Photo`"
+  .photo__img.photo__primary(
+    :style="{'background-image': `url(${primaryPhoto})`}"
     @click="showLightbox(true, 0)"
   )
-  .photo__secondary-block
-    img.photo__secondary(
-      :src="room.imageUrl[1]"
-      :alt="`${room.name} Photo`"
+  ul.photo__dots(v-if="dots.display")
+    li(
+      v-for="(url, i) in room.imageUrl"
+      :key="`img${i}`"
+      :class="{'photo__dots--selected': url === dots.nowUrl}"
+      @click="changeImage(url, i)"
+    )
+  .photo__secondary-block(v-else)
+    .photo__img.photo__secondary(
+      :style="{'background-image': `url(${room.imageUrl[1]})`}"
       @click="showLightbox(true, 1)"
     )
-    img.photo__secondary(
-      :src="room.imageUrl[2]"
-      :alt="`${room.name} Photo`"
+    .photo__img.photo__secondary(
+      :style="{'background-image': `url(${room.imageUrl[2]})`}"
       @click="showLightbox(true, 2)"
     )
 .detail(v-if="room.name")
@@ -114,9 +118,15 @@ export default {
         endDate: '',
       },
       loadingDisplay: false,
+      dots: {
+        display: false,
+        nowUrl: '',
+        nowIndex: 0,
+      },
     };
   },
   created() {
+    this.layoutWidth();
     this.showLoading(true);
     this.roomId = sessionStorage.getItem('roomId');
     this.getRoomDetail();
@@ -228,7 +238,11 @@ export default {
     showLightbox(show, i = 0) {
       this.lightboxInfo.name = this.room.name;
       this.lightboxInfo.photo = this.room.imageUrl;
-      this.lightboxInfo.photoIndex = i;
+      if (this.dots.display) {
+        this.lightboxInfo.photoIndex = this.dots.nowIndex;
+      } else {
+        this.lightboxInfo.photoIndex = i;
+      }
       this.lightboxInfo.display = show;
     },
     // 顯示/隱藏 Booking
@@ -239,8 +253,40 @@ export default {
     showLoading(show) {
       this.loadingDisplay = show;
     },
+    // 監聽視窗寬度
+    layoutWidth() {
+      if (window.innerWidth <= 768) {
+        this.dots.display = true;
+      } else {
+        this.dots.display = false;
+      }
+      window.addEventListener('resize', () => {
+        if (window.innerWidth <= 768) {
+          this.dots.display = true;
+        } else {
+          this.dots.display = false;
+        }
+      });
+    },
+    // 點圓點切換顯示照片
+    changeImage(url, i) {
+      if (this.dots.display) {
+        this.dots.nowUrl = url;
+        this.dots.nowIndex = i;
+      }
+    },
   },
   computed: {
+    // 主要照片
+    primaryPhoto() {
+      if (this.dots.display) {
+        if (!this.dots.nowUrl) {
+          [this.dots.nowUrl] = this.room.imageUrl;
+        }
+        return this.dots.nowUrl;
+      }
+      return this.room.imageUrl[0];
+    },
     // 床型文字轉換
     bedType() {
       const bed = this.room.descriptionShort.Bed || [];
@@ -277,50 +323,94 @@ export default {
   width: 164px
   height: 53px
   background: url('~@/assets/images/roomDetail/logo_block.svg') no-repeat
-  z-index: 99
+  z-index: 10
 
 .photo
   height: 596px
   box-shadow: 0 5px 10px 0px rgba(#cccccc, 30%)
+  position: relative
   @include flex()
+  @include phone()
+    height: 60vh
   > *
     height: 100%
-  img
-    object-fit: cover
+  .photo__img
+    // background: center / cover no-repeat
+    background: center / 100% 100% no-repeat
+    transition: background 0.4s linear
     &:hover
       cursor: pointer
       filter: brightness(90%)
-      transition: all .3s ease-in
+      transition: all 0.3s ease-in
+  &__dots
+    width: 150px
+    height: fit-content
+    position: absolute
+    bottom: 30px
+    left: 50%
+    transform: translateX(-50%)
+    @include flex(space-between)
+    li
+      width: 20px
+      height: 20px
+      border-radius: 50%
+      background: $primary-color
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5)
+      cursor: pointer
+      &.photo__dots--selected
+        background: #ADE8C6
   &__primary
-    height: 100%
     width: 70%
+    height: 100%
+    @include tablet()
+      width: 100%
   &__secondary-block
     width: 30%
-    @include flex()
     flex-direction: column
+    @include flex()
     .photo__secondary
       height: 50%
       width: 100%
 
 .detail
   padding: 47px 62px 69px 72px
+  flex-wrap: wrap
   @include flex(space-between)
+  @include tablet()
+    padding: 47px 10% 69px 10%
   .room
     width: 60%
+    @include tablet()
+      width: 100%
   .reservation
     width: 35%
+    @media (max-width: 900px)
+      width: 40%
+    @include tablet()
+      width: 100%
+      margin-top: 30px
 
 .room
   @include flex()
   flex-wrap: wrap
   .room-info
     width: 80%
+    @include tablet()
+      width: 100%
   .room-price
     width: 20%
+    @media (max-width: 900px)
+      width: 80%
+    @include tablet()
+      width: 100%
   .room-time
     width: 80%
+    @include tablet()
+      width: 100%
   .room-amenities
     width: 80%
+    @include tablet()
+      width: 100%
 
 .room-info
   &__title
@@ -350,7 +440,7 @@ export default {
       font-size: 16px
       letter-spacing: 1.7px
     &:nth-child(even)
-      color: #6D7278
+      color: $dark-grey
       letter-spacing: 1.5px
       margin-top: 5px
       margin-bottom: 14px
@@ -368,6 +458,8 @@ export default {
     @include zebra-three-slashes
   div:first-child
     margin-right: 20%
+    @include phone-small()
+      margin-right: 10%
   p
     &:first-child
       letter-spacing: 1.5px
@@ -386,6 +478,9 @@ export default {
     margin-bottom: 30px
     padding-left: 38px
     background: left center/20px 20px no-repeat
+    @include phone()
+      width: 50%
+      background-position: top left
   .not-provide
     opacity: 0.3
   .wifi
@@ -393,7 +488,7 @@ export default {
   .television
     background-image: url('~@/assets/images/roomDetail/television.svg')
   .view
-    background-image: url('~@/assets/images/roomDetail/wifi.svg')
+    background-image: url('~@/assets/images/roomDetail/mountain-range.svg')
   .breakfast
     background-image: url('~@/assets/images/roomDetail/breakfast.svg')
   .airConditioner
@@ -414,6 +509,7 @@ export default {
     background-image: url('~@/assets/images/roomDetail/dog.svg')
 
 .reservation
+  position: relative
   &__date-picker
     margin-bottom: 26px
     box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.15)
@@ -446,4 +542,8 @@ export default {
     background: #F0F0F0
     color: #ffffff
     font-weight: 500
+    @include tablet()
+      position: absolute
+      right: 0
+      bottom: -5px
 </style>

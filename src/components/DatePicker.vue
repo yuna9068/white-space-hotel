@@ -1,6 +1,9 @@
 <template lang="pug">
 #datepicker__block
   #datepicker
+  p.datepicker__desc
+    span &nbsp;
+    | 代表已被預訂，請選擇別的日期
 </template>
 
 <script>
@@ -27,7 +30,7 @@ export default {
       document.querySelector('#datepicker').remove();
       const child = document.createElement('div');
       child.id = 'datepicker';
-      document.querySelector('#datepicker__block').appendChild(child);
+      document.querySelector('#datepicker__block').prepend(child);
 
       const vueThis = this;
       this.laydate.render({
@@ -244,4 +247,16 @@ $datepicker-disabled-font-color: #C9CCD0 !important
             @include zebra-black()
           &::after
             content: none
+
+#datepicker__block
+  #datepicker
+    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.15)
+  .datepicker__desc
+    margin-top: 10px
+    text-align: center
+    span
+      display: inline-block
+      width: 30px
+      margin-right: 10px
+      @include zebra-black()
 </style>

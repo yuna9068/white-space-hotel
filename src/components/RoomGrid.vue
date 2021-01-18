@@ -9,7 +9,7 @@
     ul.room-info
       li.room-info__name-eng {{ room.name }}
       li.room-info__name-chi {{ roomNameChi(room.name) }}
-      li.room-info__price NT.{{ room.normalDayPrice }}
+      li.room-info__price NT.{{ room.normalDayPrice }}&nbsp;
         span.price-weekday 平日
         span.price-holiday NT.{{ room.holidayPrice }} 假日
 </template>
@@ -94,6 +94,7 @@ export default {
         &:after
           content: ""
           display: block
+          height: 0 // 避免可能會有繼承字體大小或多了空白或其他問題
           clear: both
         .price-holiday
           color: $dark-grey

@@ -64,8 +64,9 @@ router-link(to="/")
         @get-selected-date="getSelectedDate"
         ref="DatePicker"
       )
-    button.reservation__button(@click="checkSelectedDate()") 預約時段
-    button.reservation__delete(@click="deleteAllReservation()") 取消所有預約
+    .reservation__buttons
+      button.reservation__check(@click="checkSelectedDate()") 預約時段
+      button.reservation__delete(@click="deleteAllReservation()") 取消所有預約
 
 Lightbox(
   :info="lightboxInfo"
@@ -512,8 +513,9 @@ export default {
   position: relative
   &__date-picker
     margin-bottom: 26px
-    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.15)
-  &__button
+  &__buttons
+    @include flex(space-between, flex-end)
+  &__check
     width: 118px
     height: 53px
     font-weight: 400
@@ -534,16 +536,9 @@ export default {
       z-index: -1
       @include zebra-black
   &__delete
-    position: fixed
-    right: 10px
-    bottom: 20px
     padding: 10px
     border-radius: 5px
     background: #F0F0F0
     color: #ffffff
     font-weight: 500
-    @include tablet()
-      position: absolute
-      right: 0
-      bottom: -5px
 </style>

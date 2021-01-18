@@ -17,17 +17,20 @@
         li.contact__mail whitespace@whitespace.com.tw
         li.contact__address 台北市羅斯福路十段30號
   RoomGrid(v-if="roomGridDisplay" :rooms="rooms" @room-detail="goRoomDetail")
+  Thanks
 </template>
 
 <script>
 import Menu from '@/components/Menu.vue';
 import RoomGrid from '@/components/RoomGrid.vue';
+import Thanks from '@/components/Thanks.vue';
 
 export default {
   name: 'Home',
   components: {
     Menu,
     RoomGrid,
+    Thanks,
   },
   data() {
     return {

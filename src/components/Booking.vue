@@ -6,9 +6,11 @@
       .booking-form__row
         label 姓名
         input(type="text" v-model="name")
+        p {{ errorMsg.name }}
       .booking-form__row
         label 電話
         input(type="phone" v-model="phone")
+        p {{ errorMsg.phone }}
       .booking-form__row
         label 預約起迄
         .booking-form__period
@@ -25,7 +27,12 @@
       .booking-form__price =&nbsp;&nbsp;&nbsp;&nbsp;NT.{{ totalPrice }}
       .booking-form__buttons
         input(type="button" value="取消" @click="$emit('close')")
-        input(type="submit" value="確定預約" :disabled="checkUserInfo()" @click.prevent="reservation()")
+        input(
+          type="submit"
+          value="確定預約"
+          :disabled="!checkUserInfo()"
+          @click.prevent="reservation()"
+        )
 </template>
 
 <script>
@@ -46,9 +53,17 @@ export default {
     return {
       name: '',
       phone: '',
+      errorMsg: {
+        name: '',
+        phone: '',
+      },
     };
   },
+  created() {
+    this.checkUserInfo();
+  },
   methods: {
+    // 轉換日期格式
     formatDate(date) {
       if (date) {
         return date.replace(/-0?/g, '/');
@@ -57,16 +72,45 @@ export default {
     },
     // 檢查使用者輸入資料
     checkUserInfo() {
-      const phoneReg = /(\d{2,3}-?|\(\d{2,3}\))\d{3,4}-?\d{4}|09\d{2}(\d{6}|-\d{3}-?\d{3})/g;
-      const phoneMatch = this.phone.match(phoneReg) || [];
-      if (this.name.length > 0 && phoneMatch.length > 0) {
+      const checkName = this.checkUserName();
+      const checkPhone = this.checkUserPhone();
+      return checkName && checkPhone;
+    },
+    // 檢查姓名，只能輸入繁體中文、簡體中文或英文姓名
+    checkUserName() {
+      if (!this.name) {
+        this.errorMsg.name = '請輸入中文或英文姓名';
         return false;
       }
-      return true;
+      const nameReg = /^[\u4e00-\u9fa5a-zA-Z]+$/g;
+      const nameMatch = this.name.match(nameReg);
+      if (nameMatch.length > 0) {
+        this.errorMsg.name = '';
+      } else {
+        this.errorMsg.name = '請輸入中文或英文姓名';
+      }
+      return nameMatch.length > 0;
+    },
+    // 檢查電話，
+    // 市話格式： 區碼2~3碼，後面3碼加4碼 或 4碼加4碼，- 可加可不加
+    // 手機格式： 共10碼，- 可加可不加
+    checkUserPhone() {
+      if (!this.phone) {
+        this.errorMsg.phone = '請輸入手機或市話';
+        return false;
+      }
+      const phoneReg = /(\d{2,3}-?|\(\d{2,3}\))\d{3,4}-?\d{4}|09\d{2}(\d{6}|-\d{3}-?\d{3})/g;
+      const phoneMatch = this.phone.match(phoneReg) || [];
+      if (phoneMatch.length > 0) {
+        this.errorMsg.phone = '';
+      } else {
+        this.errorMsg.phone = '手機或市話格式錯誤';
+      }
+      return phoneMatch.length > 0;
     },
     // 確定預約
     reservation() {
-      if (this.checkUserInfo()) {
+      if (!this.checkUserInfo()) {
         return;
       }
 
@@ -113,6 +157,7 @@ export default {
 .booking-form
   &__row
     margin-bottom: 15px
+    flex-wrap: wrap
     @include flex(space-between, center)
     label, input
       letter-spacing: 1.5px
@@ -126,6 +171,12 @@ export default {
       padding: 7px 11px
       border: 1px solid #C9C9C9
       border-radius: 5px
+    p
+      height: 20px
+      flex: 0 0 100%
+      text-align: right
+      font-size: $font-size-small
+      color: #ff0000
   &__period
     flex: auto
     @include flex(space-between, center)

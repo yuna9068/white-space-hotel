@@ -70,7 +70,6 @@ $text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5)
     @include tablet()
       position: absolute
       top: calc(50% - 20px)
-      transform: translateY(-5px) scaleY(3)
   &__arrow-left
     @include tablet()
       left: 7%

@@ -5,11 +5,11 @@
     form.booking-form
       .booking-form__row
         label 姓名
-        input(type="text" v-model="name")
+        input(type="text" v-model="name" required)
         p {{ errorMsg.name }}
       .booking-form__row
         label 電話
-        input(type="phone" v-model="phone")
+        input(type="phone" v-model="phone" required)
         p {{ errorMsg.phone }}
       .booking-form__row
         label 預約起迄

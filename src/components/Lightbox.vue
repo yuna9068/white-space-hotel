@@ -4,18 +4,18 @@
     .lightbox__arrow-left(
       :class="{'lightbox__arrow--disabled': nowIndex === 0}"
       @click.stop="changePhoto(nowIndex - 1)"
-    ) &lt;
+    ) &LeftAngleBracket;
     .lightbox__photo
       .photo__display
         img(:src="info.photo[nowIndex]" :alt="`${info.name} Photo`")
       .photo__desc
         .photo__desc-name {{ info.name }}
         .photo__desc-qty {{ nowIndex + 1 }}/{{ info.photo.length }}
-      .photo__close(@click.self="$emit('close')") x
+      .photo__close(@click.self="$emit('close')") &times;
     .lightbox__arrow-right(
       :class="{'lightbox__arrow--disabled': nowIndex === info.photo.length - 1}"
       @click.stop="changePhoto(nowIndex + 1)"
-    ) &gt;
+    ) &RightAngleBracket;
 </template>
 
 <script>
@@ -63,7 +63,7 @@ $text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5)
   &__arrow-left, &__arrow-right
     color: $primary-color
     font-size: 38px
-    transform: scaleY(3)
+    transform: scale(2, 1.2)
     cursor: pointer
     user-select: none
     text-shadow: $text-shadow
@@ -103,12 +103,12 @@ $text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5)
       text-shadow: $text-shadow
   &__close
     position: absolute
-    top: 20px
-    right: 30px
+    top: 15px
+    right: 15px
+    font-size: 28px
     font-weight: 500
     color: $primary-color
     user-select: none
     cursor: pointer
-    transform: scale(3, 2)
     text-shadow: $text-shadow
 </style>

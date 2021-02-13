@@ -91,7 +91,7 @@ export default {
         font-size: 16px
         line-height: 30px
         letter-spacing: 1.5px
-        &:after
+        &::after
           content: ""
           display: block
           height: 0 // 避免可能會有繼承字體大小或多了空白或其他問題

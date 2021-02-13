@@ -12,7 +12,7 @@ button.btn-thanks(@click="thanksDisplay = true") 特別感謝
         a(href="https://www.flaticon.com/free-icon/sofa_494967" target="_blank") Flaticon 網站上由 Pixel perfect 製作的 sofa.svg
       li
         a(href="https://www.flaticon.com/free-icon/television_637274" target="_blank") Flaticon 網站上由 Pixel perfect 製作的 Television.svg
-    .thanks__close(@click.self="thanksDisplay = false") x
+    .thanks__close(@click.self="thanksDisplay = false") &times;
 </template>
 
 <script>
@@ -93,11 +93,11 @@ export default {
           color: #87cefa
   &__close
     position: absolute
-    top: 3px
+    top: 5px
     right: 10px
-    transform: scale(1.5, 1.2)
+    font-size: 18px
     cursor: pointer
     user-select: none
     color: $dark-grey
-    // text-shadow: 1px 1px 2px lighten($dark-grey, 40%)
+    text-shadow: 1px 1px 2px lighten($dark-grey, 40%)
 </style>

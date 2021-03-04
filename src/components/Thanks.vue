@@ -5,13 +5,13 @@ button.btn-thanks(@click="thanksDisplay = true") 特別感謝
     .thanks__title 特別感謝以下人士提供的各項資源，我才能完成這個網站
     ul.thanks__list
       li
-        a(href="https://challenge.thef2e.com/user/1600?schedule=3851#works-3851" target="_blank") UI 設計師 edith.hsu 的 UI 稿，並提供相關 icon 圖檔
+        a(href="https://challenge.thef2e.com/user/1600?schedule=3851#works-3851" target="_blank" rel="noreferrer noopener") UI 設計師 edith.hsu 的 UI 稿，並提供相關 icon 圖檔
       li
-        a(href="https://challenge.thef2e.com/news/17" target="_blank") 六角學院提供旅館 API 服務
+        a(href="https://challenge.thef2e.com/news/17" target="_blank" rel="noreferrer noopener") 六角學院提供旅館 API 服務
       li
-        a(href="https://www.flaticon.com/free-icon/sofa_494967" target="_blank") Flaticon 網站上由 Pixel perfect 製作的 sofa.svg
+        a(href="https://www.flaticon.com/free-icon/sofa_494967" target="_blank" rel="noreferrer noopener") Flaticon 網站上由 Pixel perfect 製作的 sofa.svg
       li
-        a(href="https://www.flaticon.com/free-icon/television_637274" target="_blank") Flaticon 網站上由 Pixel perfect 製作的 Television.svg
+        a(href="https://www.flaticon.com/free-icon/television_637274" target="_blank" rel="noreferrer noopener") Flaticon 網站上由 Pixel perfect 製作的 Television.svg
     .thanks__close(@click.self="thanksDisplay = false") &times;
 </template>
 

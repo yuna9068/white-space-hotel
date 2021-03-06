@@ -3,10 +3,6 @@ import Home from '../views/Home.vue';
 
 const routes = [
   {
-    path: '/:catchAll(.*)',
-    redirect: '/',
-  },
-  {
     path: '/',
     name: 'Home',
     component: Home,
@@ -15,6 +11,10 @@ const routes = [
     path: '/detail',
     name: 'RoomDetail',
     component: () => import('@/views/RoomDetail.vue'),
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/',
   },
 ];
 

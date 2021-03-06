@@ -9,9 +9,9 @@
     .info
       ul.icon
         li
-          a.icon__facebook(href="https://www.facebook.com" target="_blank" title="Facebook")
+          a.icon__facebook(href="https://www.facebook.com" target="_blank" rel="noreferrer noopener" title="Facebook")
         li
-          a.icon__instagram(href="https://www.instagram.com" target="_blank" title="Instagram")
+          a.icon__instagram(href="https://www.instagram.com" target="_blank" rel="noreferrer noopener" title="Instagram")
       ul.contact
         li.contact__phone 02-17264937
         li.contact__mail whitespace@whitespace.com.tw

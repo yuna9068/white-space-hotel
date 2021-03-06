@@ -83,13 +83,14 @@ export default {
         return false;
       }
       const nameReg = /^[\u4e00-\u9fa5a-zA-Z]+$/g;
-      const nameMatch = this.name.match(nameReg);
+      const nameMatch = this.name.match(nameReg) || [];
       if (nameMatch.length > 0) {
         this.errorMsg.name = '';
-      } else {
-        this.errorMsg.name = '請輸入中文或英文姓名';
+        return true;
       }
-      return nameMatch.length > 0;
+
+      this.errorMsg.name = '請輸入中文或英文姓名';
+      return false;
     },
     // 檢查電話
     checkUserPhone() {
@@ -112,10 +113,10 @@ export default {
       const phoneMatch = this.phone.match(phoneReg) || [];
       if (phoneMatch.length > 0) {
         this.errorMsg.phone = '';
-      } else {
-        this.errorMsg.phone = '手機或市話格式錯誤';
+        return true;
       }
-      return phoneMatch.length > 0;
+      this.errorMsg.phone = '手機或市話格式錯誤';
+      return false;
     },
     // 確定預約
     reservation() {

@@ -544,4 +544,5 @@ export default {
     background: #F0F0F0
     color: #ffffff
     font-weight: 500
+    display: none
 </style>

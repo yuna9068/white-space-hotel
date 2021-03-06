@@ -144,8 +144,11 @@ export default {
           [this.room] = response.data.room;
           this.bookedInfo = response.data.booking;
           this.bookedDates = {};
+          const today = new Date().toISOString().substr(0, 10).replaceAll('-', '');
           this.bookedInfo.forEach((booking) => {
-            this.bookedDates[booking.date] = '';
+            if (booking.date.replaceAll('-', '') >= today) {
+              this.bookedDates[booking.date] = '';
+            }
           });
         }
 

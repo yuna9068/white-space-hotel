@@ -91,14 +91,23 @@ export default {
       }
       return nameMatch.length > 0;
     },
-    // 檢查電話，
-    // 市話格式： 區碼2~3碼，後面3碼加4碼 或 4碼加4碼，- 可加可不加
-    // 手機格式： 共10碼，- 可加可不加
+    // 檢查電話
     checkUserPhone() {
+      // 是否有輸入值
       if (!this.phone) {
         this.errorMsg.phone = '請輸入手機或市話';
         return false;
       }
+
+      // 是否輸入超過 10 個數字
+      if (this.phone.length > 10) {
+        this.errorMsg.phone = '輸入字數過多';
+        return false;
+      }
+
+      // 是否符合格式
+      // 市話格式： 區碼2~3碼，後面3碼加4碼 或 4碼加4碼，- 可加可不加
+      // 手機格式： 共10碼，- 可加可不加
       const phoneReg = /(\d{2,3}-?|\(\d{2,3}\))\d{3,4}-?\d{4}|09\d{2}(\d{6}|-\d{3}-?\d{3})/g;
       const phoneMatch = this.phone.match(phoneReg) || [];
       if (phoneMatch.length > 0) {

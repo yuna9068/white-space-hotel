@@ -1,85 +1,86 @@
 <template lang="pug">
-router-link(to="/")
-  h1.logo White Space Hotel
-.photo(v-if="room.imageUrl")
-  .photo__img.photo__primary(
-    :style="{'background-image': `url(${primaryPhoto})`}"
-    @click="showLightbox(true, 0)"
-  )
-  ul.photo__dots(v-if="dots.display")
-    li(
-      v-for="(url, i) in room.imageUrl"
-      :key="`img${i}`"
-      :class="{'photo__dots--selected': url === dots.nowUrl}"
-      @click="changeImage(url, i)"
+.roomDetail
+  router-link(to="/")
+    h1.logo White Space Hotel
+  .photo(v-if="room.imageUrl")
+    .photo__img.photo__primary(
+      :style="{'background-image': `url(${primaryPhoto})`}"
+      @click="showLightbox(true, 0)"
     )
-  .photo__secondary-block(v-else)
-    .photo__img.photo__secondary(
-      :style="{'background-image': `url(${room.imageUrl[1]})`}"
-      @click="showLightbox(true, 1)"
-    )
-    .photo__img.photo__secondary(
-      :style="{'background-image': `url(${room.imageUrl[2]})`}"
-      @click="showLightbox(true, 2)"
-    )
-.detail(v-if="room.name")
-  .room
-    .room-info
-      .room-info__title {{ room.name }}
-      ul.room-info__list
-        li 房客人數限制： {{ room.descriptionShort.GuestMin }}~{{ room.descriptionShort.GuestMax }} 人
-        li 床型：{{ bedType }}
-        li 衛浴數量： {{ room.descriptionShort['Private-Bath'] }} 間
-        li 房間大小： {{ room.descriptionShort.Footage }} 平方公尺
-      .room-info__desc {{ room.description }}
-    ul.room-price
-      li NT.{{ room.normalDayPrice }}
-      li 平日(一~四)
-      li NT.{{ room.holidayPrice }}
-      li 假日(五~日)
-    .room-time
-      div
-        p Check In
-        p {{ room.checkInAndOut.checkInEarly }} - {{ room.checkInAndOut.checkInLate }}
-      div
-        p Check Out
-        p {{ room.checkInAndOut.checkOut }}
-    ul.room-amenities
-      li.wifi(:class="{'not-provide': !room.amenities['Wi-Fi']}") Wi-Fi
-      li.television(:class="{'not-provide': !room.amenities.Television}") 電視
-      li.view(:class="{'not-provide': !room.amenities['Great-View']}") 漂亮的視野
-      li.breakfast(:class="{'not-provide': !room.amenities.Breakfast}") 早餐
-      li.airConditioner(:class="{'not-provide': !room.amenities['Air-Conditioner']}") 空調
-      li.smoke(:class="{'not-provide': !room.amenities['Smoke-Free']}") 禁止吸煙
-      li.bar(:class="{'not-provide': !room.amenities['Mini-Bar']}") Mini Bar
-      li.refrigerator(:class="{'not-provide': !room.amenities.Refrigerator}") 冰箱
-      li.child(:class="{'not-provide': !room.amenities['Child-Friendly']}") 適合兒童
-      li.roomService(:class="{'not-provide': !room.amenities['Room-Service']}") Room Service
-      li.sofa(:class="{'not-provide': !room.amenities.Sofa}") 沙發
-      li.dog(:class="{'not-provide': !room.amenities['Pet-Friendly']}") 寵物攜帶
-  .reservation
-    .reservation__date-picker
-      DatePicker(
-        :markDates="bookedDates"
-        @get-selected-date="getSelectedDate"
-        ref="DatePicker"
+    ul.photo__dots(v-if="dots.display")
+      li(
+        v-for="(url, i) in room.imageUrl"
+        :key="`img${i}`"
+        :class="{'photo__dots--selected': url === dots.nowUrl}"
+        @click="changeImage(url, i)"
       )
-    .reservation__buttons
-      button.reservation__check(@click="checkSelectedDate()") 預約時段
-      button.reservation__delete(@click="deleteAllReservation()") 取消所有預約
+    .photo__secondary-block(v-else)
+      .photo__img.photo__secondary(
+        :style="{'background-image': `url(${room.imageUrl[1]})`}"
+        @click="showLightbox(true, 1)"
+      )
+      .photo__img.photo__secondary(
+        :style="{'background-image': `url(${room.imageUrl[2]})`}"
+        @click="showLightbox(true, 2)"
+      )
+  .detail(v-if="room.name")
+    .room
+      .room-info
+        .room-info__title {{ room.name }}
+        ul.room-info__list
+          li 房客人數限制： {{ room.descriptionShort.GuestMin }}~{{ room.descriptionShort.GuestMax }} 人
+          li 床型：{{ bedType }}
+          li 衛浴數量： {{ room.descriptionShort['Private-Bath'] }} 間
+          li 房間大小： {{ room.descriptionShort.Footage }} 平方公尺
+        .room-info__desc {{ room.description }}
+      ul.room-price
+        li NT.{{ room.normalDayPrice }}
+        li 平日(一~四)
+        li NT.{{ room.holidayPrice }}
+        li 假日(五~日)
+      .room-time
+        div
+          p Check In
+          p {{ room.checkInAndOut.checkInEarly }} - {{ room.checkInAndOut.checkInLate }}
+        div
+          p Check Out
+          p {{ room.checkInAndOut.checkOut }}
+      ul.room-amenities
+        li.wifi(:class="{'not-provide': !room.amenities['Wi-Fi']}") Wi-Fi
+        li.television(:class="{'not-provide': !room.amenities.Television}") 電視
+        li.view(:class="{'not-provide': !room.amenities['Great-View']}") 漂亮的視野
+        li.breakfast(:class="{'not-provide': !room.amenities.Breakfast}") 早餐
+        li.airConditioner(:class="{'not-provide': !room.amenities['Air-Conditioner']}") 空調
+        li.smoke(:class="{'not-provide': !room.amenities['Smoke-Free']}") 禁止吸煙
+        li.bar(:class="{'not-provide': !room.amenities['Mini-Bar']}") Mini Bar
+        li.refrigerator(:class="{'not-provide': !room.amenities.Refrigerator}") 冰箱
+        li.child(:class="{'not-provide': !room.amenities['Child-Friendly']}") 適合兒童
+        li.roomService(:class="{'not-provide': !room.amenities['Room-Service']}") Room Service
+        li.sofa(:class="{'not-provide': !room.amenities.Sofa}") 沙發
+        li.dog(:class="{'not-provide': !room.amenities['Pet-Friendly']}") 寵物攜帶
+    .reservation
+      .reservation__date-picker
+        DatePicker(
+          :markDates="bookedDates"
+          @get-selected-date="getSelectedDate"
+          ref="DatePicker"
+        )
+      .reservation__buttons
+        button.reservation__check(@click="checkSelectedDate()") 預約時段
+        button.reservation__delete(@click="deleteAllReservation()") 取消所有預約
 
-Lightbox(
-  :info="lightboxInfo"
-  @close="showLightbox(false)"
-)
+  Lightbox(
+    :info="lightboxInfo"
+    @close="showLightbox(false)"
+  )
 
-Booking(
-  :info="bookingInfo"
-  @close="showBooking(false)"
-  @reservation-room="reservationRoom"
-)
+  Booking(
+    :info="bookingInfo"
+    @close="showBooking(false)"
+    @reservation-room="reservationRoom"
+  )
 
-Loading(:display="loadingDisplay")
+  Loading(:display="loadingDisplay")
 </template>
 
 <script>
@@ -320,6 +321,12 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+.roomDetail
+  width: 100%
+  height: 100%
+  background: #ffffff
+  overflow: scroll
+
 .logo
   position: absolute
   top: 32px

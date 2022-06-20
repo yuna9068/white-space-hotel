@@ -117,6 +117,8 @@ export default {
 .home
   width: 100%
   height: 100%
+  background: #ffffff
+  overflow: scroll
 
 .main
   width: 100%

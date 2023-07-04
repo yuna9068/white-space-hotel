@@ -11,6 +11,14 @@ const routes = [
     path: '/detail',
     name: 'RoomDetail',
     component: () => import('@/views/RoomDetail.vue'),
+    beforeEnter: (to, from, next) => {
+      const roomId = sessionStorage.getItem('roomId');
+      if (!roomId) {
+        next({ name: 'Home' });
+        return;
+      }
+      next();
+    },
   },
   {
     path: '/:pathMatch(.*)*',

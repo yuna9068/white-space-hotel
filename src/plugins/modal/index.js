@@ -1,5 +1,5 @@
 import { createVNode, render } from 'vue';
-import modalComponent from '@/components/Modal.vue';
+import modalComponent from '@/components/ModalItem.vue';
 
 const pluginModal = {
   install(app) {

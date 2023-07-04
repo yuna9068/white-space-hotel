@@ -20,7 +20,7 @@
 
 <script>
 export default {
-  name: 'Lightbox',
+  name: 'LightboxItem',
   props: {
     info: {
       type: Object,

@@ -21,12 +21,12 @@
 </template>
 
 <script>
-import Menu from '@/components/Menu.vue';
+import Menu from '@/components/MenuItem.vue';
 import RoomGrid from '@/components/RoomGrid.vue';
-import Thanks from '@/components/Thanks.vue';
+import Thanks from '@/components/ThanksItem.vue';
 
 export default {
-  name: 'Home',
+  name: 'HomeView',
   components: {
     Menu,
     RoomGrid,

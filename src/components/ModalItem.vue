@@ -10,7 +10,7 @@ Teleport(to="body")
 
 <script>
 export default {
-  name: 'Modal',
+  name: 'ModalItem',
   data() {
     return {
       display: false,

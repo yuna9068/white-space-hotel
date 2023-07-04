@@ -17,7 +17,7 @@ button.btn-thanks(@click="thanksDisplay = true") 特別感謝
 
 <script>
 export default {
-  name: 'Thanks',
+  name: 'ThanksItem',
   data() {
     return {
       thanksDisplay: false,

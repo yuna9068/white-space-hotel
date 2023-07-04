@@ -85,9 +85,9 @@
 
 <script>
 import DatePicker from '@/components/DatePicker.vue';
-import Lightbox from '@/components/Lightbox.vue';
-import Booking from '@/components/Booking.vue';
-import Loading from '@/components/Loading.vue';
+import Lightbox from '@/components/LightboxItem.vue';
+import Booking from '@/components/BookingItem.vue';
+import Loading from '@/components/LoadingItem.vue';
 
 export default {
   name: 'RoomDetail',

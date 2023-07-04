@@ -39,7 +39,7 @@
 import DatePicker from '@/components/DatePicker.vue';
 
 export default {
-  nema: 'Booking',
+  name: 'BookingItem',
   components: {
     DatePicker,
   },

@@ -1,3 +1,53 @@
+<script setup>
+import {
+  provide,
+  reactive,
+  ref,
+  watch,
+} from 'vue';
+import { useRoute } from 'vue-router';
+import ModalItem from '@/components/ModalItem.vue';
+
+const route = useRoute();
+const transitionName = ref('');
+const transitionMode = ref('');
+const modalData = reactive({
+  display: false,
+  title: '',
+  msg: '',
+  btnText: '',
+});
+
+function open({ title, msg, btnText }) {
+  modalData.display = true;
+  modalData.title = title;
+  modalData.msg = msg;
+  modalData.btnText = btnText;
+}
+
+function close() {
+  modalData.display = false;
+  modalData.title = '';
+  modalData.msg = '';
+  modalData.btnText = '';
+}
+
+watch(() => route, (to) => {
+  const isSafari = (window.navigator.userAgent.toLowerCase().indexOf('safari') > -1
+  && window.navigator.userAgent.toLowerCase().indexOf('chrome') < 0);
+  if (!isSafari) {
+    const toName = to.name;
+    transitionName.value = toName === 'RoomDetail' ? 'viewTransition' : 'viewTransitionBack';
+    transitionMode.value = toName === 'RoomDetail' ? 'in-out' : '';
+  }
+}, { deep: true });
+
+provide('modal', {
+  open,
+  close,
+});
+</script>
+
 <template>
   <router-view v-slot="{ Component }">
     <transition
@@ -7,31 +57,11 @@
       <component :is="Component" />
     </transition>
   </router-view>
+  <ModalItem
+    :data="modalData"
+    @close="close"
+  />
 </template>
-
-<script>
-export default {
-  name: 'App',
-  data() {
-    return {
-      transitionName: '',
-      transitionMode: '',
-    };
-  },
-  watch: {
-    // eslint-disable-next-line
-    '$route'(to) {
-      const isSafari = (window.navigator.userAgent.toLowerCase().indexOf('safari') > -1
-        && window.navigator.userAgent.toLowerCase().indexOf('chrome') < 0);
-      if (!isSafari) {
-        const toName = to.name;
-        this.transitionName = toName === 'RoomDetail' ? 'viewTransition' : 'viewTransitionBack';
-        this.transitionMode = toName === 'RoomDetail' ? 'in-out' : '';
-      }
-    },
-  },
-};
-</script>
 
 <style lang="sass">
 $viewTransition: transform 1s ease-in-out

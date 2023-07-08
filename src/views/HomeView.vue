@@ -1,117 +1,137 @@
+<script setup>
+import {
+  computed,
+  inject,
+  onMounted,
+  reactive,
+  ref,
+} from 'vue';
+import { useRouter } from 'vue-router';
+import { apiGetRooms } from '@/api/index';
+import MenuItem from '@/components/MenuItem.vue';
+import RoomGrid from '@/components/RoomGrid.vue';
+import ThanksItem from '@/components/ThanksItem.vue';
+
+const router = useRouter();
+const modal = inject('modal');
+const rooms = reactive([]); // 所有房型
+const menuList = reactive([]); // 選單清單
+const selectedRoomIndex = ref('01'); // 目前選中的房型 index
+const selectedRoom = reactive({}); // 目前選中的房型資訊
+const roomGridDisplay = ref(false); // 格狀房型資訊顯示狀態
+
+const bgImage = computed(() => {
+  if (roomGridDisplay.value) {
+    const imgUrl = 'https://images.unsplash.com/photo-1519974719765-e6559eac2575?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80';
+    return {
+      backgroundImage: `url(${imgUrl})`,
+    };
+  }
+
+  return {
+    backgroundImage: `url(${selectedRoom.imageUrl})`,
+  };
+});
+
+// 取得所有房型基本資訊
+function fetchRoomsInfo() {
+  apiGetRooms().then((response) => {
+    if (response.data.success) {
+      rooms.push(...JSON.parse(JSON.stringify(response.data.items)));
+      menuList.push(...rooms.map((room) => ({ id: room.id, name: room.name })));
+      selectedRoomIndex.value = '01';
+      Object.assign(selectedRoom, rooms[0]);
+    }
+  }).catch((error) => {
+    let errorMsg = '系統異常，請重新整理頁面後再試';
+    if (error.response.data.message) {
+      errorMsg = error.response.data.message;
+    }
+    modal.open({
+      title: '系統異常',
+      msg: errorMsg,
+      btnText: '關閉',
+    });
+  });
+}
+
+// 前往房型詳細資訊頁
+function goRoomDetail(id) {
+  sessionStorage.setItem('roomId', id);
+  router.push({ name: 'RoomDetail' });
+}
+
+// 切換顯示房型照片及名稱
+function changeRoom(id) {
+  const index = rooms.findIndex((item) => item.id === id);
+  selectedRoomIndex.value = `0${index + 1}`;
+  Object.assign(selectedRoom, rooms[index]);
+}
+
+// 監聽視窗寬度
+function layoutWidth() {
+  if (window.innerWidth <= 768) {
+    roomGridDisplay.value = true;
+  } else {
+    roomGridDisplay.value = false;
+  }
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth <= 768) {
+      roomGridDisplay.value = true;
+    } else {
+      roomGridDisplay.value = false;
+    }
+  });
+}
+
+onMounted(() => {
+  fetchRoomsInfo();
+  layoutWidth();
+});
+</script>
+
 <template lang="pug">
 .home
   .main(:style="bgImage")
     h1.logo White Space Hotel
-    Menu.menu(:menuList="menuList" @change-room="changeRoom" @room-detail="goRoomDetail")
+    MenuItem.menu(
+      :menu-list="menuList"
+      @change-room="changeRoom"
+      @room-detail="goRoomDetail"
+    )
     .type
       .type__index {{ selectedRoomIndex }}
       .type__name {{ selectedRoom.name }}
     .info
       ul.icon
         li
-          a.icon__facebook(href="https://www.facebook.com" target="_blank" rel="noreferrer noopener" title="Facebook")
+          a.icon__facebook(
+            href="https://www.facebook.com"
+            target="_blank"
+            rel="noreferrer noopener"
+            title="Facebook"
+            aria-label="Facebook"
+          )
         li
-          a.icon__instagram(href="https://www.instagram.com" target="_blank" rel="noreferrer noopener" title="Instagram")
+          a.icon__instagram(
+            href="https://www.instagram.com"
+            target="_blank"
+            rel="noreferrer noopener"
+            title="Instagram"
+            aria-label="Instagram"
+          )
       ul.contact
         li.contact__phone 02-17264937
         li.contact__mail whitespace@whitespace.com.tw
         li.contact__address 台北市羅斯福路十段30號
-  RoomGrid(v-if="roomGridDisplay" :rooms="rooms" @room-detail="goRoomDetail")
-  Thanks
+  RoomGrid(
+    v-if="roomGridDisplay"
+    :rooms="rooms"
+    @room-detail="goRoomDetail"
+  )
+  ThanksItem
 </template>
-
-<script>
-import Menu from '@/components/MenuItem.vue';
-import RoomGrid from '@/components/RoomGrid.vue';
-import Thanks from '@/components/ThanksItem.vue';
-
-export default {
-  name: 'HomeView',
-  components: {
-    Menu,
-    RoomGrid,
-    Thanks,
-  },
-  data() {
-    return {
-      rooms: [], // 所有房型
-      menuList: [], // 選單清單
-      selectedRoomIndex: '01', // 目前選中的房型 index
-      selectedRoom: {}, // 目前選中的房型資訊
-      roomGridDisplay: false, // 格狀房型資訊顯示狀態
-    };
-  },
-  created() {
-    this.getRoomsInfo();
-    this.layoutWidth();
-  },
-  methods: {
-    // 取得所有房型基本資訊
-    getRoomsInfo() {
-      this.$axios({
-        method: 'get',
-        url: 'rooms',
-      }).then((response) => {
-        if (response.data.success) {
-          this.rooms = JSON.parse(JSON.stringify(response.data.items));
-          this.menuList = this.rooms.map((room) => ({ id: room.id, name: room.name }));
-          this.selectedRoomIndex = '01';
-          [this.selectedRoom] = [...this.rooms];
-        }
-      }).catch((error) => {
-        let errorMsg = '系統異常，請重新整理頁面後再試';
-        if (error.response.data.message) {
-          errorMsg = error.response.data.message;
-        }
-        this.$modal.open({
-          title: '系統異常',
-          msg: errorMsg,
-          btnText: '關閉',
-        });
-      });
-    },
-    // 前往房型詳細資訊頁
-    goRoomDetail(id) {
-      sessionStorage.setItem('roomId', id);
-      this.$router.push({ name: 'RoomDetail' });
-    },
-    // 切換顯示房型照片及名稱
-    changeRoom(id) {
-      const index = this.rooms.findIndex((item) => item.id === id);
-      this.selectedRoomIndex = `0${index + 1}`;
-      this.selectedRoom = this.rooms[index];
-    },
-    // 監聽視窗寬度
-    layoutWidth() {
-      if (window.innerWidth <= 768) {
-        this.roomGridDisplay = true;
-      } else {
-        this.roomGridDisplay = false;
-      }
-      window.addEventListener('resize', () => {
-        if (window.innerWidth <= 768) {
-          this.roomGridDisplay = true;
-        } else {
-          this.roomGridDisplay = false;
-        }
-      });
-    },
-  },
-  computed: {
-    bgImage() {
-      if (this.roomGridDisplay) {
-        const imgUrl = 'https://images.unsplash.com/photo-1519974719765-e6559eac2575?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80';
-        return {
-          backgroundImage: `url(${imgUrl})`,
-        };
-      }
-      return {
-        backgroundImage: `url(${this.selectedRoom.imageUrl})`,
-      };
-    },
-  },
-};
-</script>
 
 <style lang="sass" scoped>
 .home

@@ -1,9 +1,52 @@
+<script setup>
+import { toRefs } from 'vue';
+
+const props = defineProps({
+  rooms: {
+    type: Array,
+    default: () => [],
+  },
+});
+const { rooms } = toRefs(props);
+const emits = defineEmits(['room-detail']);
+
+function showDetail(id) {
+  emits('room-detail', id);
+}
+
+function bgImage(imageUrl) {
+  return {
+    backgroundImage: `url(${imageUrl})`,
+  };
+}
+
+function roomNameChi(name) {
+  switch (name) {
+    case 'Single Room':
+      return '單人房';
+    case 'Deluxe Single Room':
+      return '豪華單人房';
+    case 'Double Room':
+      return '雙人房';
+    case 'Deluxe Double Room':
+      return '豪華雙人房';
+    case 'Twin Room':
+      return '雙床雙人房';
+    case 'Deluxe Twin Room':
+      return '豪華雙床雙人房';
+    default:
+      return '房';
+  }
+}
+</script>
+
 <template lang="pug">
 .roomGrid
   .room(
     v-for="room in rooms"
     :key="room.id"
-    @click="$emit('room-detail', room.id)"
+    @click="showDetail(room.id)"
+    @keyup="showDetail(room.id)"
   )
     .room-img(:style="bgImage(room.imageUrl)")
     ul.room-info
@@ -13,43 +56,6 @@
         span.price-weekday 平日
         span.price-holiday NT.{{ room.holidayPrice }} 假日
 </template>
-
-<script>
-export default {
-  name: 'RoomGrid',
-  props: {
-    rooms: {
-      type: Array,
-      default: () => [],
-    },
-  },
-  methods: {
-    bgImage(imageUrl) {
-      return {
-        backgroundImage: `url(${imageUrl})`,
-      };
-    },
-    roomNameChi(name) {
-      switch (name) {
-        case 'Single Room':
-          return '單人房';
-        case 'Deluxe Single Room':
-          return '豪華單人房';
-        case 'Double Room':
-          return '雙人房';
-        case 'Deluxe Double Room':
-          return '豪華雙人房';
-        case 'Twin Room':
-          return '雙床雙人房';
-        case 'Deluxe Twin Room':
-          return '豪華雙床雙人房';
-        default:
-          return '房';
-      }
-    },
-  },
-};
-</script>
 
 <style lang="sass" scoped>
 .roomGrid

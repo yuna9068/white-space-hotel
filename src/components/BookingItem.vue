@@ -1,22 +1,147 @@
+<script setup>
+import {
+  computed,
+  onMounted,
+  reactive,
+  ref,
+  toRefs,
+} from 'vue';
+
+const props = defineProps({
+  info: {
+    type: Object,
+    default: () => ({}),
+  },
+});
+const { info } = toRefs(props);
+const emits = defineEmits(['close', 'reservation-room']);
+const name = ref('');
+const phone = ref('');
+const errorMsg = reactive({
+  name: '',
+  phone: '',
+});
+
+// 計算總費用
+const totalPrice = computed(() => {
+  const totalWeekdayPrice = info.value.weekday * info.value.weekdayPrice;
+  const totalHolidayPrice = info.value.holiday * info.value.holidayPrice;
+  return totalWeekdayPrice + totalHolidayPrice;
+});
+
+// 轉換日期格式
+function formatDate(date) {
+  if (date) {
+    return date.replace(/-0?/g, '/');
+  }
+  return '';
+}
+
+// 檢查姓名，只能輸入繁體中文、簡體中文或英文姓名
+function checkUserName() {
+  if (!name.value) {
+    errorMsg.name = '請輸入中文或英文姓名';
+    return false;
+  }
+  const nameReg = /^[\u4e00-\u9fa5a-zA-Z]+$/g;
+  const nameMatch = name.value.match(nameReg) || [];
+  if (nameMatch.length > 0) {
+    errorMsg.name = '';
+    return true;
+  }
+
+  errorMsg.name = '請輸入中文或英文姓名';
+  return false;
+}
+
+// 檢查電話
+function checkUserPhone() {
+  // 是否有輸入值
+  if (!phone.value) {
+    errorMsg.phone = '請輸入手機或市話';
+    return false;
+  }
+
+  // 是否輸入超過 10 個數字
+  if (phone.value.length > 10) {
+    errorMsg.phone = '輸入字數過多';
+    return false;
+  }
+
+  // 是否符合格式
+  // 市話格式： 區碼2~3碼，後面3碼加4碼 或 4碼加4碼，- 可加可不加
+  // 手機格式： 共10碼，- 可加可不加
+  const phoneReg = /(\d{2,3}-?|\(\d{2,3}\))\d{3,4}-?\d{4}|09\d{2}(\d{6}|-\d{3}-?\d{3})/g;
+  const phoneMatch = phone.value.match(phoneReg) || [];
+  if (phoneMatch.length > 0) {
+    errorMsg.phone = '';
+    return true;
+  }
+  errorMsg.phone = '手機或市話格式錯誤';
+  return false;
+}
+
+// 檢查使用者輸入資料
+function checkUserInfo() {
+  const checkName = checkUserName();
+  const checkPhone = checkUserPhone();
+  return checkName && checkPhone;
+}
+
+// 確定預約
+function reservation() {
+  if (!checkUserInfo()) {
+    return;
+  }
+
+  emits('reservation-room', { name: name.value, tel: phone.value });
+}
+
+function close() {
+  emits('close');
+}
+
+onMounted(() => {
+  checkUserInfo();
+});
+</script>
+
 <template lang="pug">
 .semi-transparent(:class="{'hide': !info.display}")
   .booking
     .booking__title 預約時段
     form.booking-form
       .booking-form__row
-        label 姓名
-        input(type="text" v-model="name" required)
+        label(for="booking-name") 姓名
+        input(
+          id="booking-name"
+          v-model="name"
+          type="text"
+          required
+        )
         p {{ errorMsg.name }}
       .booking-form__row
-        label 電話
-        input(type="phone" v-model="phone" required)
+        label(for="booking-phone") 電話
+        input(
+          id="booking-phone"
+          v-model="phone"
+          type="phone"
+          required
+        )
         p {{ errorMsg.phone }}
       .booking-form__row
-        label 預約起迄
+        label(for="booking-date") 預約起迄
         .booking-form__period
-          input(disabled :value="formatDate(info.startDate)")
+          input(
+            id="booking-date"
+            disabled
+            :value="formatDate(info.startDate)"
+          )
           span ~
-          input(disabled :value="formatDate(info.endDate)")
+          input(
+            disabled
+            :value="formatDate(info.endDate)"
+          )
       .booking-form__nights
         .booking-form__row
           span 平日時段
@@ -26,117 +151,18 @@
           span {{ info.holiday }}夜
       .booking-form__price =&nbsp;&nbsp;&nbsp;&nbsp;NT.{{ totalPrice }}
       .booking-form__buttons
-        input(type="button" value="取消" @click="$emit('close')")
+        input(
+          type="button"
+          value="取消"
+          @click="close"
+        )
         input(
           type="submit"
           value="確定預約"
-          :disabled="!checkUserInfo()"
-          @click.prevent="reservation()"
+          :disabled="!checkUserInfo"
+          @click.prevent="reservation"
         )
 </template>
-
-<script>
-import DatePicker from '@/components/DatePicker.vue';
-
-export default {
-  name: 'BookingItem',
-  components: {
-    DatePicker,
-  },
-  props: {
-    info: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
-  data() {
-    return {
-      name: '',
-      phone: '',
-      errorMsg: {
-        name: '',
-        phone: '',
-      },
-    };
-  },
-  created() {
-    this.checkUserInfo();
-  },
-  methods: {
-    // 轉換日期格式
-    formatDate(date) {
-      if (date) {
-        return date.replace(/-0?/g, '/');
-      }
-      return '';
-    },
-    // 檢查使用者輸入資料
-    checkUserInfo() {
-      const checkName = this.checkUserName();
-      const checkPhone = this.checkUserPhone();
-      return checkName && checkPhone;
-    },
-    // 檢查姓名，只能輸入繁體中文、簡體中文或英文姓名
-    checkUserName() {
-      if (!this.name) {
-        this.errorMsg.name = '請輸入中文或英文姓名';
-        return false;
-      }
-      const nameReg = /^[\u4e00-\u9fa5a-zA-Z]+$/g;
-      const nameMatch = this.name.match(nameReg) || [];
-      if (nameMatch.length > 0) {
-        this.errorMsg.name = '';
-        return true;
-      }
-
-      this.errorMsg.name = '請輸入中文或英文姓名';
-      return false;
-    },
-    // 檢查電話
-    checkUserPhone() {
-      // 是否有輸入值
-      if (!this.phone) {
-        this.errorMsg.phone = '請輸入手機或市話';
-        return false;
-      }
-
-      // 是否輸入超過 10 個數字
-      if (this.phone.length > 10) {
-        this.errorMsg.phone = '輸入字數過多';
-        return false;
-      }
-
-      // 是否符合格式
-      // 市話格式： 區碼2~3碼，後面3碼加4碼 或 4碼加4碼，- 可加可不加
-      // 手機格式： 共10碼，- 可加可不加
-      const phoneReg = /(\d{2,3}-?|\(\d{2,3}\))\d{3,4}-?\d{4}|09\d{2}(\d{6}|-\d{3}-?\d{3})/g;
-      const phoneMatch = this.phone.match(phoneReg) || [];
-      if (phoneMatch.length > 0) {
-        this.errorMsg.phone = '';
-        return true;
-      }
-      this.errorMsg.phone = '手機或市話格式錯誤';
-      return false;
-    },
-    // 確定預約
-    reservation() {
-      if (!this.checkUserInfo()) {
-        return;
-      }
-
-      this.$emit('reservation-room', { name: this.name, tel: this.phone });
-    },
-  },
-  computed: {
-    // 計算總費用
-    totalPrice() {
-      const totalWeekdayPrice = this.info.weekday * this.info.weekdayPrice;
-      const totalHolidayPrice = this.info.holiday * this.info.holidayPrice;
-      return totalWeekdayPrice + totalHolidayPrice;
-    },
-  },
-};
-</script>
 
 <style lang="sass" scoped>
 .booking

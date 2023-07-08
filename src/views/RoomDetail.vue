@@ -1,3 +1,236 @@
+<script setup>
+import {
+  apiGetRoomDetail,
+  apiPostReserveRoom,
+  apiDeleteAllReservations,
+} from '@/api/index';
+import DatePicker from '@/components/DatePicker.vue';
+import LightboxItem from '@/components/LightboxItem.vue';
+import BookingItem from '@/components/BookingItem.vue';
+import LoadingItem from '@/components/LoadingItem.vue';
+import {
+  computed,
+  inject,
+  nextTick,
+  onMounted,
+  reactive,
+  ref,
+} from 'vue';
+
+const modal = inject('modal');
+const refDatePicker = ref(null);
+const roomId = ref(''); // 房型編號
+const room = reactive({}); // 房型資訊
+const bookedInfo = reactive([]); // 已預訂資料
+const bookedDates = reactive({}); // 已預訂日期
+const totalDates = reactive([]); // 使用者選擇的所有日期
+const lightboxInfo = reactive({ // 照片大圖顯示資訊
+  name: '',
+  photo: [],
+  photoIndex: 0,
+  display: false,
+});
+const bookingInfo = reactive({ // 預定時段彈窗顯示資訊
+  display: false,
+  weekday: 0,
+  holiday: 0,
+  weekdayPrice: 0,
+  holidayPrice: 0,
+  startDate: '',
+  endDate: '',
+});
+const loadingDisplay = ref(false);
+const dots = reactive({
+  display: false,
+  nowUrl: '',
+  nowIndex: 0,
+});
+
+// 主要照片
+const primaryPhoto = computed(() => {
+  if (dots.display) {
+    if (!dots.nowUrl) {
+      [dots.nowUrl] = room.imageUrl;
+    }
+    return dots.nowUrl;
+  }
+  return room.imageUrl[0];
+});
+
+// 床型文字轉換
+const bedType = computed(() => {
+  const bed = room.descriptionShort.Bed || [];
+  let bedQty = '1 張';
+  if (bed.length > 1) {
+    bedQty = `${bed.length} 張`;
+  }
+  switch (bed[0]) {
+    case 'Single':
+      return `${bedQty}單人床`;
+
+    case 'Small Double':
+      return `${bedQty}小型雙人床`;
+
+    case 'Double':
+      return `${bedQty}雙人床`;
+
+    case 'Queen':
+      return `${bedQty}加大雙人床`;
+
+    default:
+      return `${bedQty}床`;
+  }
+});
+
+// 顯示/隱藏 Loading
+function showLoading(show) {
+  loadingDisplay.value = show;
+}
+
+// 顯示/隱藏 Booking
+function showBooking(show) {
+  bookingInfo.display = show;
+}
+
+// 取得房型詳細資訊
+function fetchRoomDetail() {
+  apiGetRoomDetail(roomId.value).then(async (response) => {
+    showLoading(false);
+    if (response.data.success) {
+      Object.assign(room, response.data.room[0]);
+      bookedInfo.push(...response.data.booking);
+      Object.assign(bookedDates, {});
+      const today = new Date().toISOString().substr(0, 10).replaceAll('-', '');
+      bookedInfo.forEach((booking) => {
+        if (booking.date.replaceAll('-', '') >= today) {
+          bookedDates[booking.date] = '';
+        }
+      });
+    }
+
+    await nextTick();
+
+    refDatePicker.value.initDatePicker();
+  }).catch((error) => {
+    let errorMsg = '系統異常，請重新整理頁面後再試';
+    if (error.response.data.message) {
+      errorMsg = error.response.data.message;
+    }
+    modal.open({
+      title: '系統異常',
+      msg: errorMsg,
+      btnText: '關閉',
+    });
+  });
+}
+
+// 取得使用者選擇的預約日期
+function getSelectedDate({ weekday, holiday, dates }) {
+  bookingInfo.weekday = weekday;
+  bookingInfo.holiday = holiday;
+  bookingInfo.weekdayPrice = room.normalDayPrice;
+  bookingInfo.holidayPrice = room.holidayPrice;
+  [bookingInfo.startDate] = dates;
+  bookingInfo.endDate = dates[dates.length - 1];
+  totalDates.push(...dates);
+}
+
+// 確認使用者已選擇預約日期
+async function checkSelectedDate() {
+  await refDatePicker.value.getSelectedDate();
+
+  if (totalDates.length > 0) {
+    showBooking(true);
+  } else {
+    modal.open({
+      title: '提示訊息',
+      msg: '請選擇預約起迄日期',
+      btnText: '關閉',
+    });
+  }
+}
+
+// 預約房間
+function fetchReserveRoom({ name, tel }) {
+  showBooking(false);
+  showLoading(true);
+
+  apiPostReserveRoom(roomId.value, {
+    name,
+    tel,
+    date: totalDates,
+  }).then((response) => {
+    if (response.data.success) {
+      fetchRoomDetail();
+      modal.open({
+        title: '預約成功',
+        msg: '',
+        btnText: '回頁面',
+      });
+    }
+  }).catch((error) => {
+    fetchRoomDetail();
+    let errorMsg = '系統異常，請稍後再試';
+    if (error.response.data.message) {
+      errorMsg = error.response.data.message;
+    }
+    modal.open({
+      title: '預約失敗',
+      msg: errorMsg,
+      btnText: '返回',
+    });
+  });
+}
+
+// 取消所有預約
+function fetchCancelAllReservations() {
+  apiDeleteAllReservations().finally(() => fetchRoomDetail());
+}
+
+// 顯示/隱藏 Lightbox
+function showLightbox(show, i = 0) {
+  lightboxInfo.name = room.name;
+  lightboxInfo.photo = room.imageUrl;
+  if (dots.display) {
+    lightboxInfo.photoIndex = dots.nowIndex;
+  } else {
+    lightboxInfo.photoIndex = i;
+  }
+  lightboxInfo.display = show;
+}
+
+// 監聽視窗寬度
+function layoutWidth() {
+  if (window.innerWidth <= 768) {
+    dots.display = true;
+  } else {
+    dots.display = false;
+  }
+  window.addEventListener('resize', () => {
+    if (window.innerWidth <= 768) {
+      dots.display = true;
+    } else {
+      dots.display = false;
+    }
+  });
+}
+
+// 點圓點切換顯示照片
+function changeImage(url, i) {
+  if (dots.display) {
+    dots.nowUrl = url;
+    dots.nowIndex = i;
+  }
+}
+
+onMounted(() => {
+  layoutWidth();
+  showLoading(true);
+  roomId.value = sessionStorage.getItem('roomId');
+  fetchRoomDetail();
+});
+</script>
+
 <template lang="pug">
 .roomDetail
   router-link(to="/")
@@ -6,6 +239,7 @@
     .photo__img.photo__primary(
       :style="{'background-image': `url(${primaryPhoto})`}"
       @click="showLightbox(true, 0)"
+      @keyup="showLightbox(true, 0)"
     )
     ul.photo__dots(v-if="dots.display")
       li(
@@ -13,15 +247,18 @@
         :key="`img${i}`"
         :class="{'photo__dots--selected': url === dots.nowUrl}"
         @click="changeImage(url, i)"
+        @keyup="changeImage(url, i)"
       )
     .photo__secondary-block(v-else)
       .photo__img.photo__secondary(
         :style="{'background-image': `url(${room.imageUrl[1]})`}"
         @click="showLightbox(true, 1)"
+        @keyup="showLightbox(true, 1)"
       )
       .photo__img.photo__secondary(
         :style="{'background-image': `url(${room.imageUrl[2]})`}"
         @click="showLightbox(true, 2)"
+        @keyup="showLightbox(true, 2)"
       )
   .detail(v-if="room.name")
     .room
@@ -61,264 +298,27 @@
     .reservation
       .reservation__date-picker
         DatePicker(
-          :markDates="bookedDates"
+          ref="refDatePicker"
+          :mark-dates="bookedDates"
           @get-selected-date="getSelectedDate"
-          ref="DatePicker"
         )
       .reservation__buttons
-        button.reservation__check(@click="checkSelectedDate()") 預約時段
-        button.reservation__delete(@click="deleteAllReservation()") 取消所有預約
+        button.reservation__check(@click="checkSelectedDate") 預約時段
+        button.reservation__delete(@click="fetchCancelAllReservations") 取消所有預約
 
-  Lightbox(
+  LightboxItem(
     :info="lightboxInfo"
     @close="showLightbox(false)"
   )
 
-  Booking(
+  BookingItem(
     :info="bookingInfo"
     @close="showBooking(false)"
-    @reservation-room="reservationRoom"
+    @reservation-room="fetchReserveRoom"
   )
 
-  Loading(:display="loadingDisplay")
+  LoadingItem(:display="loadingDisplay")
 </template>
-
-<script>
-import DatePicker from '@/components/DatePicker.vue';
-import Lightbox from '@/components/LightboxItem.vue';
-import Booking from '@/components/BookingItem.vue';
-import Loading from '@/components/LoadingItem.vue';
-
-export default {
-  name: 'RoomDetail',
-  components: {
-    DatePicker,
-    Lightbox,
-    Booking,
-    Loading,
-  },
-  data() {
-    return {
-      roomId: '', // 房型編號
-      room: {}, // 房型資訊
-      bookedInfo: [], // 已預訂資料
-      bookedDates: [], // 已預訂日期
-      totalDates: [], // 使用者選擇的所有日期
-      lightboxInfo: { // 照片大圖顯示資訊
-        name: '',
-        photo: [],
-        photoIndex: 0,
-        display: false,
-      },
-      bookingInfo: { // 預定時段彈窗顯示資訊
-        display: false,
-        weekday: 0,
-        holiday: 0,
-        weekdayPrice: 0,
-        holidayPrice: 0,
-        startDate: '',
-        endDate: '',
-      },
-      loadingDisplay: false,
-      dots: {
-        display: false,
-        nowUrl: '',
-        nowIndex: 0,
-      },
-    };
-  },
-  created() {
-    this.layoutWidth();
-    this.showLoading(true);
-    this.roomId = sessionStorage.getItem('roomId');
-    this.getRoomDetail();
-  },
-  methods: {
-    // 取得房型詳細資訊
-    getRoomDetail() {
-      this.$axios({
-        method: 'get',
-        url: `room/${this.roomId}`,
-      }).then((response) => {
-        this.showLoading(false);
-        if (response.data.success) {
-          [this.room] = response.data.room;
-          this.bookedInfo = response.data.booking;
-          this.bookedDates = {};
-          const today = new Date().toISOString().substr(0, 10).replaceAll('-', '');
-          this.bookedInfo.forEach((booking) => {
-            if (booking.date.replaceAll('-', '') >= today) {
-              this.bookedDates[booking.date] = '';
-            }
-          });
-        }
-
-        this.$nextTick(() => {
-          this.$refs.DatePicker.initDatePicker();
-        });
-      }).catch((error) => {
-        let errorMsg = '系統異常，請重新整理頁面後再試';
-        if (error.response.data.message) {
-          errorMsg = error.response.data.message;
-        }
-        this.$modal.open({
-          title: '系統異常',
-          msg: errorMsg,
-          btnText: '關閉',
-        });
-      });
-    },
-    // 取得使用者選擇的預約日期
-    getSelectedDate({ weekday, holiday, totalDates }) {
-      this.bookingInfo.weekday = weekday;
-      this.bookingInfo.holiday = holiday;
-      this.bookingInfo.weekdayPrice = this.room.normalDayPrice;
-      this.bookingInfo.holidayPrice = this.room.holidayPrice;
-      [this.bookingInfo.startDate] = totalDates;
-      this.bookingInfo.endDate = totalDates[totalDates.length - 1];
-      this.totalDates = totalDates;
-    },
-    // 確認使用者已選擇預約日期
-    checkSelectedDate() {
-      this.$refs.DatePicker.getSelectedDate();
-      if (this.totalDates.length > 0) {
-        this.showBooking(true);
-      } else {
-        this.$modal.open({
-          title: '提示訊息',
-          msg: '請選擇預約起迄日期',
-          btnText: '關閉',
-        });
-      }
-    },
-    // 預約房間
-    reservationRoom({ name, tel }) {
-      this.showBooking(false);
-      this.showLoading(true);
-
-      this.$axios({
-        method: 'post',
-        url: `room/${this.roomId}`,
-        params: {
-          name,
-          tel,
-          date: this.totalDates,
-        },
-      }).then((response) => {
-        if (response.data.success) {
-          this.getRoomDetail();
-          this.$modal.open({
-            title: '預約成功',
-            msg: '',
-            btnText: '回頁面',
-          });
-        }
-      }).catch((error) => {
-        this.getRoomDetail();
-        let errorMsg = '系統異常，請稍後再試';
-        if (error.response.data.message) {
-          errorMsg = error.response.data.message;
-        }
-        this.$modal.open({
-          title: '預約失敗',
-          msg: errorMsg,
-          btnText: '返回',
-        });
-      });
-    },
-    // 取消所有預約
-    deleteAllReservation() {
-      this.$axios({
-        method: 'delete',
-        url: 'rooms',
-      }).then((response) => {
-        if (response.data.success) {
-          this.getRoomDetail();
-        }
-      }).catch(() => {
-        this.getRoomDetail();
-      });
-    },
-    // 顯示/隱藏 Lightbox
-    showLightbox(show, i = 0) {
-      this.lightboxInfo.name = this.room.name;
-      this.lightboxInfo.photo = this.room.imageUrl;
-      if (this.dots.display) {
-        this.lightboxInfo.photoIndex = this.dots.nowIndex;
-      } else {
-        this.lightboxInfo.photoIndex = i;
-      }
-      this.lightboxInfo.display = show;
-    },
-    // 顯示/隱藏 Booking
-    showBooking(show) {
-      this.bookingInfo.display = show;
-    },
-    // 顯示/隱藏 Loading
-    showLoading(show) {
-      this.loadingDisplay = show;
-    },
-    // 監聽視窗寬度
-    layoutWidth() {
-      if (window.innerWidth <= 768) {
-        this.dots.display = true;
-      } else {
-        this.dots.display = false;
-      }
-      window.addEventListener('resize', () => {
-        if (window.innerWidth <= 768) {
-          this.dots.display = true;
-        } else {
-          this.dots.display = false;
-        }
-      });
-    },
-    // 點圓點切換顯示照片
-    changeImage(url, i) {
-      if (this.dots.display) {
-        this.dots.nowUrl = url;
-        this.dots.nowIndex = i;
-      }
-    },
-  },
-  computed: {
-    // 主要照片
-    primaryPhoto() {
-      if (this.dots.display) {
-        if (!this.dots.nowUrl) {
-          [this.dots.nowUrl] = this.room.imageUrl;
-        }
-        return this.dots.nowUrl;
-      }
-      return this.room.imageUrl[0];
-    },
-    // 床型文字轉換
-    bedType() {
-      const bed = this.room.descriptionShort.Bed || [];
-      let bedQty = '1 張';
-      if (bed.length > 1) {
-        bedQty = `${bed.length} 張`;
-      }
-      switch (bed[0]) {
-        case 'Single':
-          return `${bedQty}單人床`;
-
-        case 'Small Double':
-          return `${bedQty}小型雙人床`;
-
-        case 'Double':
-          return `${bedQty}雙人床`;
-
-        case 'Queen':
-          return `${bedQty}加大雙人床`;
-
-        default:
-          return `${bedQty}床`;
-      }
-    },
-  },
-};
-</script>
 
 <style lang="sass" scoped>
 .roomDetail

@@ -1,40 +1,31 @@
-<template lang="pug">
-Teleport(to="body")
-  .semi-transparent(:class="{'hide': !display}")
-    .modal
-      .modal__title {{ title }}
-      .modal__body(:class="{ imgTick: !msg }") {{ msg }}
-      .modal__footer
-        button(@click="hide()") {{ btnText }}
-</template>
-
-<script>
-export default {
-  name: 'ModalItem',
-  data() {
-    return {
+<script setup>
+const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({
       display: false,
       title: '',
       msg: '',
       btnText: '',
-    };
+    }),
   },
-  methods: {
-    open({ title, msg, btnText }) {
-      this.title = title;
-      this.msg = msg;
-      this.btnText = btnText;
-      this.display = true;
-    },
-    hide() {
-      this.display = false;
-      this.title = '';
-      this.msg = '';
-      this.btnText = '';
-    },
-  },
-};
+});
+const emits = defineEmits(['close']);
+
+function close() {
+  emits('close');
+}
 </script>
+
+<template lang="pug">
+Teleport(to="body")
+  .semi-transparent(:class="{'hide': !props.data.display}")
+    .modal
+      .modal__title {{ props.data.title }}
+      .modal__body(:class="{ imgTick: !props.data.msg }") {{ props.data.msg }}
+      .modal__footer
+        button(@click="close") {{ props.data.btnText }}
+</template>
 
 <style lang="sass" scoped>
 .modal

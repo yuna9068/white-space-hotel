@@ -1,55 +1,67 @@
+<script setup>
+import {
+  onMounted,
+  ref,
+  toRefs,
+  watch,
+} from 'vue';
+
+const props = defineProps({
+  info: {
+    type: Object,
+    default: () => ({}),
+  },
+});
+const { info } = toRefs(props);
+const emits = defineEmits(['close']);
+const nowIndex = ref(0);
+
+function close() {
+  emits('close');
+}
+
+function changePhoto(index) {
+  if (index > -1 && index < info.value.photo.length) {
+    nowIndex.value = index;
+  }
+}
+
+watch(() => info.value.photoIndex, (newValue) => {
+  nowIndex.value = newValue;
+});
+
+onMounted(() => {
+  nowIndex.value = info.value.photoIndex;
+});
+</script>
+
 <template lang="pug">
 .semi-transparent(:class="{'hide': !info.display}")
   .lightbox
     .lightbox__arrow-left(
       :class="{'lightbox__arrow--disabled': nowIndex === 0}"
       @click.stop="changePhoto(nowIndex - 1)"
+      @keyup="changePhoto(nowIndex - 1)"
     ) &LeftAngleBracket;
     .lightbox__photo
       .photo__display
-        img(:src="info.photo[nowIndex]" :alt="`${info.name} Photo`")
+        img(
+          :src="info.photo[nowIndex]"
+          :alt="`${info.name} Photo`"
+        )
       .photo__desc
         .photo__desc-name {{ info.name }}
         .photo__desc-qty {{ nowIndex + 1 }}/{{ info.photo.length }}
-      .photo__close(@click.self="$emit('close')") &times;
+      .photo__close(
+        @click.self="close"
+        @keyup="close"
+      ) &times;
     .lightbox__arrow-right(
       :class="{'lightbox__arrow--disabled': nowIndex === info.photo.length - 1}"
       @click.stop="changePhoto(nowIndex + 1)"
+      @keyup="changePhoto(nowIndex + 1)"
     ) &RightAngleBracket;
 </template>
-
-<script>
-export default {
-  name: 'LightboxItem',
-  props: {
-    info: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
-  data() {
-    return {
-      nowIndex: 0,
-    };
-  },
-  created() {
-    this.nowIndex = this.info.photoIndex;
-  },
-  methods: {
-    changePhoto(index) {
-      if (index > -1 && index < this.info.photo.length) {
-        this.nowIndex = index;
-      }
-    },
-  },
-  watch: {
-    // eslint-disable-next-line
-    'info.photoIndex': function (newValue) {
-      this.nowIndex = newValue;
-    },
-  },
-};
-</script>
 
 <style lang="sass" scoped>
 $text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5)

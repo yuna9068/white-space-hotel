@@ -1,24 +1,35 @@
+<script setup>
+import { toRefs } from 'vue';
+
+const props = defineProps({
+  menuList: {
+    type: Array,
+    default: () => [],
+  },
+});
+const { menuList } = toRefs(props);
+const emits = defineEmits(['change-room', 'room-detail']);
+
+function changeRoom(id) {
+  emits('change-room', id);
+}
+
+function roomDetail(id) {
+  emits('room-detail', id);
+}
+</script>
+
 <template lang="pug">
 ul
   li(
     v-for="room in menuList"
     :key="room.id"
-    @mouseover="$emit('change-room', room.id)"
-    @click="$emit('room-detail', room.id)"
+    @mouseover="changeRoom(room.id)"
+    @focus="changeRoom(room.id)"
+    @click="roomDetail(room.id)"
+    @keyup="roomDetail(room.id)"
   ) {{ room.name }}
 </template>
-
-<script>
-export default {
-  name: 'MenuItem',
-  props: {
-    menuList: {
-      type: Array,
-      default: () => [],
-    },
-  },
-};
-</script>
 
 <style scoped lang="sass">
 ul

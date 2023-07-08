@@ -1,3 +1,15 @@
+<script setup>
+import { toRefs } from 'vue';
+
+const props = defineProps({
+  display: {
+    type: Boolean,
+    default: false,
+  },
+});
+const { display } = toRefs(props);
+</script>
+
 <template lang="pug">
 .semi-transparent(:class="{'hide': !display}")
   ul.circle
@@ -7,18 +19,6 @@
     li
     li
 </template>
-
-<script>
-export default {
-  name: 'LoadingItem',
-  props: {
-    display: {
-      type: Boolean,
-      default: false,
-    },
-  },
-};
-</script>
 
 <style lang="sass" scoped>
 #app

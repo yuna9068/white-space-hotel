@@ -29,7 +29,7 @@ const bgImage = computed(() => {
   }
 
   return {
-    backgroundImage: `url(${selectedRoom.imageUrl})`,
+    backgroundImage: selectedRoom.imageUrl ? `url(${selectedRoom.imageUrl})` : null,
   };
 });
 

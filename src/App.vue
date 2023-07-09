@@ -25,6 +25,14 @@ function open({ title, msg, btnText }) {
   modalData.btnText = btnText;
 }
 
+function openError(errorMsg) {
+  open({
+    title: '系統異常',
+    msg: errorMsg ?? '系統異常，請重新整理頁面後再試',
+    btnText: '關閉',
+  });
+}
+
 function close() {
   modalData.display = false;
   modalData.title = '';
@@ -44,7 +52,7 @@ watch(() => route, (to) => {
 
 provide('modal', {
   open,
-  close,
+  openError,
 });
 </script>
 

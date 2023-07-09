@@ -112,15 +112,7 @@ function fetchRoomDetail() {
 
     refDatePicker.value.initDatePicker();
   }).catch((error) => {
-    let errorMsg = '系統異常，請重新整理頁面後再試';
-    if (error.response.data.message) {
-      errorMsg = error.response.data.message;
-    }
-    modal.open({
-      title: '系統異常',
-      msg: errorMsg,
-      btnText: '關閉',
-    });
+    modal.openError(error.response?.data?.message);
   });
 }
 
@@ -170,15 +162,7 @@ function fetchReserveRoom({ name, tel }) {
     }
   }).catch((error) => {
     fetchRoomDetail();
-    let errorMsg = '系統異常，請稍後再試';
-    if (error.response.data.message) {
-      errorMsg = error.response.data.message;
-    }
-    modal.open({
-      title: '預約失敗',
-      msg: errorMsg,
-      btnText: '返回',
-    });
+    modal.openError(error.response?.data?.message);
   });
 }
 

@@ -43,15 +43,7 @@ function fetchRoomsInfo() {
       Object.assign(selectedRoom, rooms[0]);
     }
   }).catch((error) => {
-    let errorMsg = '系統異常，請重新整理頁面後再試';
-    if (error.response.data.message) {
-      errorMsg = error.response.data.message;
-    }
-    modal.open({
-      title: '系統異常',
-      msg: errorMsg,
-      btnText: '關閉',
-    });
+    modal.openError(error.response?.data?.message);
   });
 }
 

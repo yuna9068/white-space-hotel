@@ -56,19 +56,17 @@ provide('modal', {
 });
 </script>
 
-<template>
-  <router-view v-slot="{ Component }">
-    <transition
-      :name="transitionName"
-      :mode="transitionMode"
-    >
-      <component :is="Component" />
-    </transition>
-  </router-view>
-  <ModalItem
-    :data="modalData"
-    @close="close"
-  />
+<template lang="pug">
+router-view(v-slot="{ Component }")
+  transition(
+    :name="transitionName"
+    :mode="transitionMode"
+  )
+    component(:is="Component")
+ModalItem(
+  :data="modalData"
+  @close="close"
+)
 </template>
 
 <style lang="sass">

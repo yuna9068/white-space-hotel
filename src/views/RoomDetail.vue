@@ -21,8 +21,8 @@ const modal = inject('modal');
 const refDatePicker = ref(null);
 const roomId = ref(''); // 房型編號
 const room = reactive({}); // 房型資訊
-const bookedInfo = reactive([]); // 已預訂資料
-const bookedDates = reactive({}); // 已預訂日期
+let bookedInfo = reactive([]); // 已預訂資料
+let bookedDates = reactive({}); // 已預訂日期
 const totalDates = reactive([]); // 使用者選擇的所有日期
 const lightboxInfo = reactive({ // 照片大圖顯示資訊
   name: '',
@@ -98,8 +98,8 @@ function fetchRoomDetail() {
     showLoading(false);
     if (response.data.success) {
       Object.assign(room, response.data.room[0]);
-      bookedInfo.push(...response.data.booking);
-      Object.assign(bookedDates, {});
+      bookedInfo = response.data.booking;
+      bookedDates = {};
       const today = new Date().toISOString().substring(0, 10).replaceAll('-', '');
       bookedInfo.forEach((booking) => {
         if (booking.date.replaceAll('-', '') >= today) {

@@ -1,14 +1,5 @@
 <script setup>
 import {
-  apiGetRoomDetail,
-  apiPostReserveRoom,
-  apiDeleteAllReservations,
-} from '@/api/index';
-import DatePicker from '@/components/DatePicker.vue';
-import LightboxItem from '@/components/LightboxItem.vue';
-import BookingItem from '@/components/BookingItem.vue';
-import LoadingItem from '@/components/LoadingItem.vue';
-import {
   computed,
   inject,
   nextTick,
@@ -16,6 +7,16 @@ import {
   reactive,
   ref,
 } from 'vue';
+import {
+  apiGetRoomDetail,
+  apiPostReserveRoom,
+  apiDeleteAllReservations,
+} from '@/api/index';
+import useEventListener from '@/composables/useEventListener';
+import DatePicker from '@/components/DatePicker.vue';
+import LightboxItem from '@/components/LightboxItem.vue';
+import BookingItem from '@/components/BookingItem.vue';
+import LoadingItem from '@/components/LoadingItem.vue';
 
 const modal = inject('modal');
 const refDatePicker = ref(null);
@@ -190,7 +191,8 @@ function layoutWidth() {
   } else {
     dots.display = false;
   }
-  window.addEventListener('resize', () => {
+
+  useEventListener(window, 'resize', () => {
     if (window.innerWidth <= 768) {
       dots.display = true;
     } else {
@@ -207,8 +209,9 @@ function changeImage(url, i) {
   }
 }
 
+layoutWidth();
+
 onMounted(() => {
-  layoutWidth();
   showLoading(true);
   roomId.value = sessionStorage.getItem('roomId');
   fetchRoomDetail();

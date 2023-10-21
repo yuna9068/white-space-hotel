@@ -8,6 +8,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { apiGetRooms } from '@/api/index';
+import useEventListener from '@/composables/useEventListener';
 import MenuItem from '@/components/MenuItem.vue';
 import RoomGrid from '@/components/RoomGrid.vue';
 import ThanksItem from '@/components/ThanksItem.vue';
@@ -68,7 +69,7 @@ function layoutWidth() {
     roomGridDisplay.value = false;
   }
 
-  window.addEventListener('resize', () => {
+  useEventListener(window, 'resize', () => {
     if (window.innerWidth <= 768) {
       roomGridDisplay.value = true;
     } else {
@@ -77,9 +78,10 @@ function layoutWidth() {
   });
 }
 
+layoutWidth();
+
 onMounted(() => {
   fetchRoomsInfo();
-  layoutWidth();
 });
 </script>
 

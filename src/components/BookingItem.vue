@@ -159,7 +159,7 @@ onMounted(() => {
         input(
           type="submit"
           value="確定預約"
-          :disabled="!checkUserInfo"
+          :disabled="!checkUserInfo()"
           @click.prevent="reservation"
         )
 </template>
